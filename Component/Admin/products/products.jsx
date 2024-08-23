@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { FaRupeeSign } from "react-icons/fa";
 import { getProducts } from "@/Redux/actions/productActions";
-import EditProducts from "./editProducts";
+import EditProducts from "./EditProducts";
 import CreateProduct from "./createproduct";
 import Loader from "../../helpers/loader";
 import axios from "axios";

@@ -1,5 +1,5 @@
 import React from 'react'
-import Products from '../../Component/Admin/products/products';
+import Products from '@/Component/Admin/products/products';
 
 const products = () => {
   return (
