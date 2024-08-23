@@ -1,0 +1,1 @@
+export const adminMenu = ["Home", "Order", "Products", "Brands", "Category", "Analytics"]
