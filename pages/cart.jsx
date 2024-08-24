@@ -97,9 +97,11 @@ const Cart = () => {
                     <p>No Cart Item Found</p>
                 </div>    
             }
+            <div className='flex flex-row gap-4 flex-wrap justify-between mt-2 px-4'>
             {cartData.map((item, index)=>(
                 <ProductCard item={item} key={index} isCart={true} deleteCartItem = {deleteCart}/>    
             ))}
+            </div>
         </div>
     </>
   )

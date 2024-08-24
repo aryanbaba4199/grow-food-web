@@ -1,35 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import Authform from "../Component/user/authform";
-import { useDispatch, useSelector } from "react-redux";
-import { login, register, logout, fetchUserDetails } from "@/Redux/actions/userAuthAction";
-import { Dialog } from "@mui/material";
-import Notifier from "../Component/helpers/popup";
-
-
-
+import { userlogin } from "@/Api";
+import { logout, fetchUserDetails } from "@/Redux/actions/userAuthAction";
+import Swal from "sweetalert2";
+import axios from "axios";
+import UserContext from "@/userContext";
+import { logo_uri } from "@/Api";
 const AuthComponent = () => {
   const [authType, setAuthType] = useState("SignIn"); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [shopName, setShopName] = useState("");
-
+  const {user, setUser} = useContext(UserContext);
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
-  
-  const [open, setOpen] = useState("");
-  const [message, setMessage] = useState("");
-
-  const dispatch = useDispatch();
-  const { user, isAuthenticated } = useSelector((state) => state?.auth);
 
   const router = useRouter();
 
   const handleAuthSwitch = () => {
-    setAuthType(authType === "SignIn" ? "SignUp" : "SignIn");
+    setAuthType(authType == "SignIn" ? "SignUp" : "SignIn");
   };
 
-  const handleSubmit = (event) => {
+
+  
+
+  const handleSubmit = async(event) => {
     event.preventDefault();
     const userData = {
       email,
@@ -42,28 +38,60 @@ const AuthComponent = () => {
     };
 
     if (authType === "SignIn") {
-      dispatch(login(email, password));
+      try {
+        const response = await axios.post(`${userlogin}`, { email, password });
+        const { token, user } = response.data;
+        localStorage.setItem("token", token);
+        setUser(user);
+        Swal.fire({
+          title : 'success',
+          icon : 'success',
+          text : 'Log in Successfully',
+        })
+        router.push("/");
+      } catch (error) {
+        console.error("Login error:", error);
+        Swal.fire({
+          title : 'error',
+          icon : 'error',
+          text : error.message,
+        });
+      }
       
     } else {
-      dispatch(register(userData));
-      <Notifier open={open}
-        setOpen={setOpen}
-        message={"Register successfully..."}
-      />
+      try {
+       const res = await axios.post(`${API_URL}/register`, userData);
+        if(res.status===200){
+          Swal.fire({
+            title : 'Success',
+            icon : 'success',
+            text : "Thanks for joining Grow Food"
+          });
+        }
+      } catch (error) {
+        console.error("Registration error:", error);
+        Swal.fire({
+          title : 'Failure',
+          icon : 'error',
+          text : error.message
+        });
+      }
     }
-  };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchUserDetails());
-    }
-  }, [isAuthenticated, dispatch]);
+  };  
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-bold text-white text-center mb-6">
-        {authType === "SignIn" ? "Sign In" : "Create Account"}
+      <div className="flex flex-col justify-center items-center">
+      <img
+        src={logo_uri}
+        alt="Grow Food"
+        className=" w-32 border-pink-400 shadow-black shadow-lg border-2 rounded-full p-4"
+      />
+      <h2 className="text-2xl font-semibold text-white bg-pink-600 text-center mt-4 my-2 px-4 py-1 rounded-md">
+        {authType == "SignIn" ? "Sign In" : "Create Account"}
       </h2>
+      </div>
+      
       <Authform
         authType={authType}
         email={email}
@@ -80,7 +108,7 @@ const AuthComponent = () => {
         shopName={shopName}
         setShopName={setShopName}
       />
-      {isAuthenticated && user && (
+      {user?.user && (
         <div className="mt-8 text-white">
           <h3>User Details:</h3>
           <p>Name: {user.name}</p>

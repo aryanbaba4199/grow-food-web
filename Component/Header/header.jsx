@@ -12,6 +12,7 @@ import { MdMenu } from "react-icons/md";
 import { Dialog, Drawer } from "@mui/material";
 import { SiIfood } from "react-icons/si";
 import Profile from "../user/profile";
+import { gf_colors } from "@/constants";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -41,7 +42,7 @@ const Header = () => {
 
   return (
     <>
-      <div className="bg-slate-950 text-white">
+      <div className="bg-[#1e4426] text-white">
         <div className="flex justify-between items-center px-4">
           <div className="md:w-[20%] w-[30%] flex justify-start gap-3 items-center">
             {user?.user.email === "aryanbaba4199@gmail.com" && (
@@ -71,21 +72,21 @@ const Header = () => {
           <div className="md:flex hidden justify-start ml-12 items-center gap-12 w-[50%] ">
             <Link href="/" className="flex gap-2 ">
               <span>
-                <FaHome className="mt-1 text-yellow-500" />
+                <FaHome className={`${gf_colors.primary_Icon_Color} mt-1`} />
               </span>
               <span>Home</span>
             </Link>
             <Link href="/cart" className="flex gap-2 ">
               <span>
-                <FaCartPlus className="mt-1 text-yellow-500" />
+                <FaCartPlus className={`${gf_colors.primary_Icon_Color} mt-1`} />
               </span>
               <span>Cart</span>
             </Link>
-            {user?.user ? (
+            {user?.user? (
               <>             
                <button onClick={handleSignOut} className="flex gap-2 ">
                 <span>
-                  <FaLockOpen className="mt-1 text-yellow-500" />
+                  <FaLockOpen className={`${gf_colors.primary_Icon_Color} mt-1`} />
                 </span>
                 <span>Log out</span>
               </button>
@@ -99,15 +100,16 @@ const Header = () => {
                 <span>Log In</span>
               </Link>
             )}
-            {user?.user?.email === "aryanbaba4199@gmail.com" ? (
+            {user?.user?.email === "aryanbaba4199@gmail.com" && (
               <Link href="/admin/analytics" className="flex gap-2 ">
-                <span className="mt-1 text-blue-800">
+                <span className={`${gf_colors.primary_Icon_Color} mt-1`}>
                   <MdAdminPanelSettings />
                 </span>
                 <span>Admin</span>
               </Link>
-            ) : (
-              user && (
+            )  }
+            <>
+              {user?.user?.email &&
                 <button
                   className="flex gap-2 "
                   onClick={() => setShowProfile(true)}
@@ -117,14 +119,16 @@ const Header = () => {
                   </span>
                   <span>Profile</span>
                 </button>
-              )
-            )}
+              
+
+            }
+            </>
           </div>
         </div>
       </div>
 
       <Drawer open={userMenu} onClose={() => setUserMenu(false)}>
-        <div className="bg-slate-950 text-white h-full flex flex-col ">
+        <div className="bg-[#1e4426] text-white h-full flex flex-col ">
           <div className="flex flex-col justify-center items-center mt-8 font-semibold">
             <SiIfood className="text-7xl" />
             <span className="text-lg">
@@ -202,7 +206,7 @@ const Header = () => {
       </Drawer>
 
       <Drawer open={menu} onClose={() => setMenu(false)}>
-        <div className="bg-slate-950 text-white h-full flex flex-col">
+        <div className="bg-[#1e4426] text-white h-full flex flex-col">
           <div className="flex flex-col justify-center items-center mt-8 font-semibold">
             <SiIfood className="text-7xl" />
             <span className="text-lg">

@@ -45,7 +45,7 @@ const Orders = () => {
 
     console.log('products', orders, orderIds, orderIds);
 
-    
+   console.log('orders', orders); 
 
   return (
     <>
@@ -53,7 +53,7 @@ const Orders = () => {
             {orderIds.map((item, index)=>(
                 <div key={index}>
                     <img
-                        src={orders[index].image}
+                        src={orders[index]?.image}
                         alt='Grow Food'
                     />
                 </div>

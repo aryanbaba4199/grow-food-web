@@ -7,10 +7,11 @@ import Swal from "sweetalert2";
 import { getuserAddress } from "@/Api";
 import { TextField, Button, Grid, Container, Typography } from '@mui/material';
 import Link from "next/link";
+import { FaEye } from "react-icons/fa";
+
 
 
 const defaultformData = {
-  userId: "" ?? user.user._id,
   name: "",
   mobile: "",
   locality: "",
@@ -50,13 +51,16 @@ const Profile = () => {
    
   
     try {
-      const res = await axios.post(`${createAddress}`, {formData});
+      const res = await axios.post(`${createAddress}`, {address : formData});
       if (res.status === 200) {
         Swal.fire({
           title: "Success",
           text: "Address successfully added",
           icon: "success",
         });
+        getAddress(user.user._id);
+        setAddressMode(false);
+        
       }
     } catch (e) {
       console.error(e);
@@ -81,7 +85,9 @@ const Profile = () => {
     }
   };
 
-  console.log(address);
+
+
+  console.table(user);
 
   return (
     <>
@@ -106,6 +112,18 @@ const Profile = () => {
     </Grid>
     <Grid item xs={12}>
       <TextField
+        onMouseLeave={()=>{
+          setFormData({
+            ...formData,
+            userId: user.user._id
+          })
+        }}
+        onBlur={()=>{
+          setFormData({
+            ...formData,
+            userId: user.user._id
+          })
+        }}
         label="Name"
         name="name"
         value={formData.name}
@@ -182,29 +200,61 @@ const Profile = () => {
       ) : (
         <div className="bg-gray-100">
           <div>
+            <div className="flex justify-center items-center">
             <img
               src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
               width={150}
               height={150}
-              className="rounded-full mx-8"
+              className="rounded-full mx-8 border-2 border-green-600 shadow-md shadow-green-600 mt-1"
               onClick={()=>getAddress(user.user._id)}
             />
+            </div>
             <div className="flex flex-col justify-center items-center mt-4 gap-2 ">
-              <span className="font-semibold text-xl px-4 py-1 bg-blue-600 rounded-lg text-white">
+              <span className="font-semibold text-xl px-4 py-1 bg-green-600 rounded-lg text-white">
                 {user.user.name}
               </span>
               <span className="text-sm bg-blue-100 px-2 py-1">
                 {user.user.email}
               </span>
-              <span>Cart : {user.user.cartLength ?? 0} </span>
-              <Link href="/Orders">Orders : {user.user.orderLength ?? 0}</Link>
+              
             </div>
-            <div className="flex justify-between items-center mt-4 px-4">
-              <span>Address </span>
-              <FaPlus
-                className="text-blue-600 font-semibold"
+            <div>
+            <div className="flex justify-between items-center mt-4 px-4 bg-green-600">
+              <Link href="/Orders" className="font font-semibold text-white">Orders : {user?.orderLength ??0} </Link>
+              <FaEye
+                className=" react-icons text-lg"
                 onClick={()=>setAddressMode(!addressmode)}
               />
+              </div>
+              <div className="flex justify-between items-center mt-4 px-4 bg-green-600">
+              <Link href="/cart" className="font font-semibold text-white">Cart : {user.cartLength}</Link>
+              <FaEye
+                className=" react-icons text-lg"
+                onClick={()=>setAddressMode(!addressmode)}
+              />
+              </div>
+              <div className="flex justify-between items-center mt-4 px-4 bg-green-600">
+              <span className="font font-semibold text-white">Address : {address.length} </span>
+              <FaPlus
+                className=" react-icons text-lg"
+                onClick={()=>setAddressMode(!addressmode)}
+              />
+              </div>
+            </div>
+            <div>
+              {address.map((item, index)=>(
+                <div className="flex flex-col bg-gray-100 text-sm shadow-md shadow-green-600 mt-2 px-4">
+                  <span>Name : {item.name}</span>
+                  <span>Mobile : {item.mobile}</span>
+                  <div className="flex flex-wrap gap-2 flex-row mt-1 text-sm text-gray-700">
+                    <span>{item.landmark}</span>
+                    <span>{item.locality}</span>
+                    <span>{item.city}</span>
+                    <span>{item.state}</span>
+                    <span>{item.zip}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

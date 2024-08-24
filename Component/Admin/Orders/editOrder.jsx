@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -6,32 +6,54 @@ import {
   DialogActions,
   Button,
   TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
+import products from '@/pages/admin/products';
 
-const EditOrder = ({ open, setOpen, order, onUpdate, onDelete }) => {
+
+const EditOrder = ({ open, setOpen, order, onUpdate, onDelete, productDetails }) => {
   const [updatedOrder, setUpdatedOrder] = useState({});
+  const [showFailureReason, setShowFailureReason] = useState(false);
 
   useEffect(() => {
     setUpdatedOrder({ ...order });
+    if (updatedOrder.status === 'Failure') {
+      setShowFailureReason(true);
+    } else {
+      setShowFailureReason(false);
+    }
   }, [order]);
 
   const handleChange = (e) => {
-    setUpdatedOrder({ ...updatedOrder, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setUpdatedOrder({ ...updatedOrder, [name]: value });
+
+    // Show the failure reason field if "Failure" is selected
+    if (name === 'status' && value === 'Failure') {
+      setShowFailureReason(true);
+    } else if (name === 'status') {
+      setShowFailureReason(false);
+    }
   };
 
   const handleUpdate = () => {
     onUpdate(updatedOrder);
   };
 
+  console.table('Data', order);
+
   return (
-    <Dialog open={open} onClose={()=>setOpen(false)}>
+    <Dialog open={open} onClose={() => setOpen(false)}>
       <DialogTitle>Edit Order</DialogTitle>
       <DialogContent>
         <TextField
           fullWidth
           label="User Name"
           name="userName"
-          value={updatedOrder.userName || ''}
+          value={products.userName || ''}
           onChange={handleChange}
           margin="normal"
         />
@@ -83,9 +105,39 @@ const EditOrder = ({ open, setOpen, order, onUpdate, onDelete }) => {
           onChange={handleChange}
           margin="normal"
         />
+
+        {/* Status Dropdown */}
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Status</InputLabel>
+          <Select
+            label="Status"
+            name="status"
+            value={updatedOrder.status || ''}
+            onChange={handleChange}
+          >
+            <MenuItem value="Not Processed">Not Processed</MenuItem>
+            <MenuItem value="Processed">Processed</MenuItem>
+            <MenuItem value="In Shipment">In Shipment</MenuItem>
+            <MenuItem value="Ready to Deliver">Ready to Deliver</MenuItem>
+            <MenuItem value="Success">Success</MenuItem>
+            <MenuItem value="Failure">Failure</MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* Conditionally Render the Failure Reason Field */}
+        {showFailureReason && (
+          <TextField
+            fullWidth
+            label="Failure Reason"
+            name="failureReason"
+            value={updatedOrder.failureReason || ''}
+            onChange={handleChange}
+            margin="normal"
+          />
+        )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={()=>setOpen(false)} color="secondary">
+        <Button onClick={() =>setOpen(false)} color="secondary">
           Cancel
         </Button>
         <Button onClick={handleUpdate} color="primary">

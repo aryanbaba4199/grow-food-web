@@ -17,7 +17,8 @@ const ProductCard = ({ item, isCart, deleteCartItem }) => {
 
       </div> : 
       <div
-        className="px-2 border rounded-md flex flex-col py-2 justify-center items-center cursor-pointer shadow-sm shadow-black hover:shadow-black hover:shadow-md"
+      onClick={() => setOpen(true)}
+        className="px-2 flex-1 border rounded-md flex flex-col py-2 justify-center items-center cursor-pointer shadow-sm shadow-black hover:shadow-black hover:shadow-md"
       >
         <img src={item.image[0]} className="w-24" alt={item.name} onClick={() => setOpen(true)} />
         <div onClick={() => setOpen(true)}>
@@ -33,7 +34,7 @@ const ProductCard = ({ item, isCart, deleteCartItem }) => {
           <>
             {isCart && (
               <button onClick={() => deleteCartItem(item._id)}>
-                <MdDelete className="text-red-600 text-end" />
+                <MdDelete className="text-red-600 text-end z-10" />
               </button>
             )}
           </>

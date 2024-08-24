@@ -5,7 +5,9 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState('');
   const ref = useRef(false);
+
 
   useEffect(() => {
     ref.current = true;
@@ -14,6 +16,7 @@ export const UserProvider = ({ children }) => {
       if (userid !== '') {
         const user = JSON.parse(userid);
         setUser(user);
+        setToken(localStorage.getItem('token'));
       }
     }
     return () => {
@@ -21,8 +24,12 @@ export const UserProvider = ({ children }) => {
     };
   }, []);
 
+  
+
+
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, token, setToken }}>
       {children}
     </UserContext.Provider>
   );

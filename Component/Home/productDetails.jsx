@@ -17,6 +17,9 @@ import { Dialog } from "@mui/material";
 import Checkout from "../checkout/checkout";
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaCircleMinus } from "react-icons/fa6";
+import axios from "axios";
+import { createCartbyUser } from "@/Api";
+import Swal from "sweetalert2";
 
 const ProductDetails = ({ product, setOpen }) => {
   const [index, setIndex] = useState(0);
@@ -28,8 +31,33 @@ const ProductDetails = ({ product, setOpen }) => {
 
   
   const {user} = useContext(UserContext)
-  const handleCart = () => {
-    console.log(product);
+  const handleCart = async() => {
+    const data = {userId : user.user._id, productId : product._id};
+    try{
+        const res = await axios.post(`${createCartbyUser}`, 
+          {data}
+        );
+        if(res.status===200){
+          Swal.fire({
+            title : 'Success',
+            icon : 'success',
+            text : 'Added to Cart Successfully...',
+            showClass : {
+              popup : 'true',
+            }
+          })
+        }
+        
+    }catch(e){
+      console.error(e);
+      Swal.fire({
+        title : 'Failed',
+        icon : 'error',
+        text : e.message,
+        position: "top-end",
+        
+      });
+    }
   };
 
   const handleBuyNow = () => {
@@ -60,7 +88,7 @@ const ProductDetails = ({ product, setOpen }) => {
     <>
       <div className="w-full flex justify-end items-start">
         <IoMdCloseCircle
-          className="text-3xl text-red-600 cursor-pointer"
+          className="text-3xl absolute text-red-600 cursor-pointer"
           onClick={() => setOpen(false)}
         />
       </div>
@@ -175,6 +203,7 @@ const ProductDetails = ({ product, setOpen }) => {
           qty={qty}
           uid={user._id}
           setCopen={setCopen}
+          setOpen = {setOpen}
         />
       </Dialog>
     </>

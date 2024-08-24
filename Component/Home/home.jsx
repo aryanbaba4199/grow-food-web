@@ -57,7 +57,7 @@ const Home = () => {
               filter={handleCategoryFilter}
             />
           </div>
-          <div className="flex mt-8 justify-between rounded-sm py-1 bg-gradient-to-r from-yellow-400 via-cyan-300 to-[#009867] ">
+          <div className="flex mt-8 justify-between rounded-sm py-1 bg-gradient-to-r from-[#5fd579] via-[#19a232] to-[#1e4426] ">
             <span className="font-bold text-lg px-8">Special Products</span>
           </div>
           <div

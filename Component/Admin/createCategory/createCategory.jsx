@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Typography,
   DialogActions,
 } from "@mui/material";
 import axios from "axios";
@@ -157,9 +158,9 @@ const CreateCategory = () => {
   return (
     <div>
       <div className="px-8">
-        <div className="font-semibold text-lg flex justify-center items-center mt-8">
-          <p>Categories</p>
-        </div>
+      <Typography variant="h4" className="mb-4 flex justify-center items-center ">
+        <span className="bg-[#1e4426] rounded-s-md px-4 text-white">Create Product</span>
+      </Typography>
         <div className="grid md:grid-cols-6 items-center mt-8 gap-2">
           {categories.map((item, index) => (
             <div

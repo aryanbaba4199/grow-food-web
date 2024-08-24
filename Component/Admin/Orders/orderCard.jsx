@@ -6,6 +6,7 @@ import { Dialog, Tooltip } from "@mui/material";
 import { MdModeEditOutline, MdDelete } from "react-icons/md";
 
 import EditOrder from "./editOrder";
+import orders from "@/pages/admin/orders";
 
 const OrderCard = ({ order }) => {
   const [editMode, setEditMode] = useState(false);
@@ -84,11 +85,13 @@ const OrderCard = ({ order }) => {
       <Dialog open={editMode} onClose={handleClose}>
         
         <EditOrder
-          productDetails={productDetails}
+          order={order}
+          productDetails={product}
           onUpdate={handleUpdate}
           onDelete={handleDelete}
           open = {open}
           setOpen = {setOpen}
+          
         />
       </Dialog>
     </div>

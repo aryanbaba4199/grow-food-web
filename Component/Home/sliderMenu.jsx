@@ -3,6 +3,7 @@ import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import Countdown from "react-countdown";
 import { useRouter } from "next/router";
+import { gf_colors } from "@/constants";
 
 const Slide = ({ products, title, timer, filter }) => {
   const router = useRouter();
@@ -20,7 +21,7 @@ const Slide = ({ products, title, timer, filter }) => {
 
   return (
     <div className="flex flex-col">
-      <div className="flex justify-between rounded-sm py-1 bg-gradient-to-r from-yellow-400 via-cyan-300 to-[#009867] ">
+      <div className={`flex justify-between rounded-sm py-1 bg-gradient-to-r from-[#5fd579] via-[#19a232] to-[#1e4426] `}>
         <p className="pl-8 font-bold text-lg">{title}</p>
         <div className="md:flex hidden gap-2 w-[70%]">
           {timer && (
