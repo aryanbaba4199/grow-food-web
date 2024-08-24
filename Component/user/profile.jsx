@@ -78,6 +78,7 @@ const Profile = () => {
       const res = await axios.get(`${getuserAddress}/${user.user._id}`);
       if (res.status === 200) {
         console.log("Success", res.data);
+        localStorage.setItem('userAddress', JSON.stringify(res.data))
         setAddress(res.data);
       }
     } catch (e) {

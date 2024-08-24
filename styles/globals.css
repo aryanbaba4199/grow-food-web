@@ -17,3 +17,7 @@
 :root{
     background-color: rgb(237, 237, 237);
 }  
+.bg-color-1{
+    background-color: #1e4426;
+    color: white;
+}

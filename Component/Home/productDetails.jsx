@@ -32,7 +32,7 @@ const ProductDetails = ({ product, setOpen }) => {
   
   const {user} = useContext(UserContext)
   const handleCart = async() => {
-    const data = {userId : user.user._id, productId : product._id};
+    const data = {userId : user?.user?._id, productId : product?._id};
     try{
         const res = await axios.post(`${createCartbyUser}`, 
           {data}
@@ -61,7 +61,7 @@ const ProductDetails = ({ product, setOpen }) => {
   };
 
   const handleBuyNow = () => {
-    if (user.user._id) {
+    if (user.user?._id) {
       setCheckoutProduct(product);
       setEmail(user.user.email);
       setCopen(true);
@@ -201,7 +201,7 @@ const ProductDetails = ({ product, setOpen }) => {
           product={checkoutProduct}
           email={email}
           qty={qty}
-          uid={user._id}
+          uid={user?._id}
           setCopen={setCopen}
           setOpen = {setOpen}
         />

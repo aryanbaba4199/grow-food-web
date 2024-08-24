@@ -33,7 +33,7 @@ const ProductCard = ({ item, isCart, deleteCartItem }) => {
           </>
           <>
             {isCart && (
-              <button onClick={() => deleteCartItem(item._id)}>
+              <button onClick={() => deleteCartItem(item?._id)}>
                 <MdDelete className="text-red-600 text-end z-10" />
               </button>
             )}
