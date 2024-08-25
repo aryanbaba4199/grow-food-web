@@ -92,7 +92,7 @@ const Cart = () => {
         </div>
             
             }
-            {cartData.length==0 &&
+            {userId!=='' && cartData.length==0 &&
                 <div className='w-[100vw] h-[100vh] flex justify-center items-center text-2xl font-semibold'>
                     <p>No Cart Item Found</p>
                 </div>    

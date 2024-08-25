@@ -9,6 +9,7 @@ const ProductCard = ({ item, isCart, deleteCartItem }) => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  
 
   return (
     <>

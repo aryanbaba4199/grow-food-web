@@ -24,6 +24,15 @@ export const UserProvider = ({ children }) => {
     };
   }, []);
 
+  useEffect(()=>{
+    if(token!==''){
+      const x = localStorage.getItem('user');
+      console.log('calling x', x);
+      setUser(x);
+    }
+    
+  }, [token])
+
   
 
 

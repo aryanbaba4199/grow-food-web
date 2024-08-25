@@ -13,13 +13,14 @@ import {
 } from "@mui/material";
 import UserContext from "@/userContext";
 
-import { Dialog } from "@mui/material";
+import { Dialog,useMediaQuery, useTheme } from "@mui/material";
 import Checkout from "../checkout/checkout";
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaCircleMinus } from "react-icons/fa6";
 import axios from "axios";
 import { createCartbyUser } from "@/Api";
 import Swal from "sweetalert2";
+import { useRouter } from "next/router";
 
 const ProductDetails = ({ product, setOpen }) => {
   const [index, setIndex] = useState(0);
@@ -29,10 +30,12 @@ const ProductDetails = ({ product, setOpen }) => {
   const [email, setEmail] = useState("");
   const [qty, setQty] = useState(product.minimumOrderQty);
 
-  
-  const {user} = useContext(UserContext)
+  const router = useRouter();
+  const {token, user} = useContext(UserContext)
+
   const handleCart = async() => {
-    const data = {userId : user?.user?._id, productId : product?._id};
+    if(token!==''){
+      const data = {userId : user?.user?._id, productId : product?._id};
     try{
         const res = await axios.post(`${createCartbyUser}`, 
           {data}
@@ -58,13 +61,40 @@ const ProductDetails = ({ product, setOpen }) => {
         
       });
     }
+    }else{
+      Swal.fire({
+        title : 'Log in Required',
+        icon : 'warning',
+        text : 'Log in required for handling cart details',
+        confirmButtonText : 'Log in '
+      }).then((result)=>{
+        if(result.isConfirmed){
+          
+          router.push('/auth')
+        }
+      })
+    }
+    
   };
 
   const handleBuyNow = () => {
-    if (user.user?._id) {
+  
+    if (token!=='') {
       setCheckoutProduct(product);
       setEmail(user.user.email);
       setCopen(true);
+    }else{
+      Swal.fire({
+        title : 'Log in Required',
+        icon : 'warning',
+        text : 'Log in required to provide you the best services...',
+        confirmButtonText : 'Log in '
+      }).then((result)=>{
+        if(result.isConfirmed){
+          
+          router.push('/auth')
+        }
+      })
     }
   };
 
@@ -76,6 +106,9 @@ const ProductDetails = ({ product, setOpen }) => {
     }
   };
 
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+
   const handleIncrement = () => {
     if (qty > product.availableQty) {
       console.log("This is maximum quantity");
@@ -86,13 +119,13 @@ const ProductDetails = ({ product, setOpen }) => {
 
   return (
     <>
-      <div className="w-full flex justify-end items-start">
+      <div className="w-full flex justify-end items-start md:mt-0 mt-16">
         <IoMdCloseCircle
           className="text-3xl absolute text-red-600 cursor-pointer"
           onClick={() => setOpen(false)}
         />
       </div>
-      <div className="flex flex-col md:flex-row justify-between mt-8 px-4 gap-8">
+      <div className="flex flex-col md:flex-row justify-between mt-8 px-4 gap-8 md:mb-0 mb-8">
         <div className="flex flex-col justify-center w-full md:w-[45%] items-center">
           <img
             src={product.image[index]}
@@ -112,7 +145,7 @@ const ProductDetails = ({ product, setOpen }) => {
               </IconButton>
             </Tooltip>
           </div>
-          <div className="mt-4 w-full flex gap-2 justify-center items-center">
+          <div className="mt-4 w-full flex gap-2 justify-center md:relative fixed bottom-0 items-center">
             <Button
               onClick={handleCart}
               variant="contained"
@@ -141,7 +174,7 @@ const ProductDetails = ({ product, setOpen }) => {
               ))}
             </div>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 mb-16">
             <div className="flex items-center text-green-600">
               <FaRupeeSign className="text-xl" />
               <span className="text-xl font-bold ml-1">
@@ -156,6 +189,12 @@ const ProductDetails = ({ product, setOpen }) => {
             </div>
             <Table className="mt-4">
               <TableBody>
+              <TableRow>
+                  <TableCell>Total Payable :/-</TableCell>
+                  <TableCell
+                  className={`${(product.sellingPrice*qty)>2000 ? "text-green-700 font-semibold" : 'text-red-600'}`}
+                  >{product.sellingPrice*qty}/-</TableCell>
+                </TableRow>
                 <TableRow>
                   <TableCell>Brand:</TableCell>
                   <TableCell>{product.brand}</TableCell>
@@ -201,6 +240,10 @@ const ProductDetails = ({ product, setOpen }) => {
           product={checkoutProduct}
           email={email}
           qty={qty}
+          fullWidth
+        maxWidth="lg"
+        fullScreen={isSmallScreen} // Enable full screen mode on small screens
+        PaperProps={{ style: { width: isSmallScreen ? "100%" : "80%", height: "100vh" } }}
           uid={user?._id}
           setCopen={setCopen}
           setOpen = {setOpen}

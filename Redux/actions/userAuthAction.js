@@ -40,6 +40,8 @@ export const register = (userData) => async (dispatch) => {
 
 export const logout = () => (dispatch) => {
   localStorage.removeItem("token");
+  localStorage.removeItem('user')
+  localStorage.removeItem('userAddress');
   dispatch({ type: LOGOUT });
 };
 

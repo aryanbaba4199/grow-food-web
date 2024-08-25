@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Search from "./search";
 import { FaHome, FaLockOpen, FaLock, FaCartPlus } from "react-icons/fa";
 import Link from "next/link";
@@ -13,12 +13,12 @@ import { Dialog, Drawer } from "@mui/material";
 import { SiIfood } from "react-icons/si";
 import Profile from "../user/profile";
 import { gf_colors } from "@/constants";
+import UserContext from "@/userContext";
 
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-
-  const { token, user } = useSelector((state) => state.auth);
+  const {user, token} = useContext(UserContext);
   const [menu, setMenu] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
@@ -32,13 +32,23 @@ const Header = () => {
   }, [dispatch, token]);
 
   const handleSignOut = () => {
-    dispatch(logout());
-    router.reload();
+    try{
+        localStorage.removeItem("token");
+        localStorage.removeItem('user')
+        localStorage.removeItem('userAddress');
+        router.reload();
+    }catch(e){
+      console.error(e);
+    }
+    
+    
   };
   
   if (!isMounted) {
     return null;
   }
+
+  console.log('user header is', user)
 
   return (
     <>

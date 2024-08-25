@@ -76,10 +76,21 @@ const Checkout = ({ product, email, qty, uid, setCopen, setOpen }) => {
     }
   };
   console.table(address);
+  useEffect(()=>{
+    if(product.sellingPrice*qty<2000){
+      Swal.fire({
+        icon : 'info',
+        title : `Order Amount : ${product.sellingPrice*qty}/-`,
+        text : `Order Amount can not be less than 2000/-`
+      })
+      setCopen(false);
+    }
+    
+  }, []);
 
   return (
     <>
-      <button className="z-10 float-end self-end">
+      <button className="z-10 float-end self-end md:mt-0 mt-8">
           <IoMdCloseCircle
             className="text-3xl text-red-600 hover:cursor-pointer"
             onClick={()=>setCopen(false)}
@@ -95,7 +106,7 @@ const Checkout = ({ product, email, qty, uid, setCopen, setOpen }) => {
               <CardContent>
                 <Typography
                   variant="h6"
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
+                  className="bg-color-1 text-white px-4 py-2 rounded-md"
                 >
                   Delivery Address
                 </Typography>
@@ -142,7 +153,7 @@ const Checkout = ({ product, email, qty, uid, setCopen, setOpen }) => {
               <CardContent>
                 <Typography
                   variant="h6"
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
+                  className="bg-color-1 text-white px-4 py-2 rounded-md"
                 >
                   Product Details
                 </Typography>
@@ -156,10 +167,10 @@ const Checkout = ({ product, email, qty, uid, setCopen, setOpen }) => {
                     </Typography>
                     <Typography>
                       Discounted Amount:{" "}
-                      {(product.price * product.discount) / 100}/-
+                      {((product.price * product.discount) / 100)*qty}/-
                     </Typography>
                     <Typography>
-                      Total Payable: {product.sellingPrice || 10 * qty}/-
+                      Total Payable: {product.sellingPrice*qty}/-
                     </Typography>
                   </div>
                   
@@ -171,7 +182,7 @@ const Checkout = ({ product, email, qty, uid, setCopen, setOpen }) => {
         <div className="flex justify-center items-center">
           <button
             onClick={handleCheckOut}
-            className="mt-8 bg-green-600 text-white px-4 py-2 rounded-md font-semibold"
+            className="mt-8 bg-color-1 text-white px-4 py-2 rounded-md font-semibold"
           >
             Checkout
           </button>
