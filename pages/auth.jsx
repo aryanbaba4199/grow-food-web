@@ -15,7 +15,7 @@ const AuthComponent = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [shopName, setShopName] = useState("");
-  const { user, setUser, setToken } = useContext(UserContext);
+  const { user, setUser, setToken, token } = useContext(UserContext);
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [loader, setLoader] = useState(false);
@@ -23,7 +23,7 @@ const AuthComponent = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (user !== null) {
+    if (token !=='') {
       router.push("/");
     }
   }, [user]);

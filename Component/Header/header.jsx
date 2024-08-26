@@ -55,13 +55,13 @@ const Header = () => {
       <div className="bg-[#1e4426] text-white">
         <div className="flex justify-between items-center px-4">
           <div className="md:w-[20%] w-[30%] flex justify-start gap-3 items-center">
-            {user?.user.email === "aryanbaba4199@gmail.com" && (
+            {user?.user?.email === "aryanbaba4199@gmail.com" && (
               <MdMenu
                 onClick={() => setMenu(!menu)}
                 className="text-3xl hover:cursor-pointer"
               />
             )}
-            {user?.user.email !== "aryanbaba4199@gmail.com" && (
+            {user?.user?.email !== "aryanbaba4199@gmail.com" && (
               <MdMenu
                 onClick={() => setUserMenu(!userMenu)}
                 className="text-3xl hover:cursor-pointer md:hidden block"
@@ -92,7 +92,7 @@ const Header = () => {
               </span>
               <span>Cart</span>
             </Link>
-            {user?.user? (
+            {user?.user ?  (
               <>             
                <button onClick={handleSignOut} className="flex gap-2 ">
                 <span>

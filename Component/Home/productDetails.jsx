@@ -81,7 +81,7 @@ const ProductDetails = ({ product, setOpen }) => {
   
     if (token!=='') {
       setCheckoutProduct(product);
-      setEmail(user.user.email);
+      setEmail(user?.user?.email);
       setCopen(true);
     }else{
       Swal.fire({
@@ -108,6 +108,8 @@ const ProductDetails = ({ product, setOpen }) => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+
+  console.log(isSmallScreen);
 
   const handleIncrement = () => {
     if (qty > product.availableQty) {
@@ -240,9 +242,9 @@ const ProductDetails = ({ product, setOpen }) => {
           product={checkoutProduct}
           email={email}
           qty={qty}
-          fullWidth
+         
         maxWidth="lg"
-        fullScreen={isSmallScreen} // Enable full screen mode on small screens
+        fullScreen={isSmallScreen}
         PaperProps={{ style: { width: isSmallScreen ? "100%" : "80%", height: "100vh" } }}
           uid={user?._id}
           setCopen={setCopen}

@@ -20,8 +20,9 @@ const Checkout = ({ product, email, qty, uid, setCopen, setOpen }) => {
       getAddress();
     }
   }, [user]);
-
+  console.log(typeof user);
   const getAddress = async () => {
+    console.log(user);
     try {
       const res = await axios.get(`${getuserAddress}/${user.user._id}`);
       if (res.status === 200) {
