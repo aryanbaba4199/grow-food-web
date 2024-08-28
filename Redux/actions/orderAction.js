@@ -1,11 +1,11 @@
 import axios from "axios";
-
+import { OrdersApi } from "@/Api";
 export const CREATE_ORDER = "CREATE_ORDER";
 export const FETCH_ORDER = "FETCH_ORDER";
 export const FETCH_ORDERS = "FETCH_ORDERS";
 
-// const API_URL = "http://localhost:5000/api/orders"
-const API_URL = "https://growfoodapi.onrender.com/api/orders"
+const API_URL = OrdersApi;
+
 
 export const createOrder = (order) => async dispatch => {
     try {

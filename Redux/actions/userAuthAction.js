@@ -1,4 +1,5 @@
 import axios from "axios";
+import { usersAPi } from "@/Api";
 
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAIL = "LOGIN_FAIL";
@@ -8,8 +9,8 @@ export const LOGOUT = "LOGOUT";
 export const FETCH_USER_SUCCESS = "FETCH_USER_SUCCESS";
 export const FETCH_USER_FAIL = "FETCH_USER_FAIL";
 
-// const API_URL = "http://localhost:5000/api/users";
-const API_URL = "https://growfoodapi.onrender.com/api/users";
+const API_URL = usersAPi;
+
 
 export const login = (email, password) => async (dispatch) => {
   try {

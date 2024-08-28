@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import { productsAPi } from '@/Api';
 export const GET_PRODUCTS = 'GET_PRODUCTS';
 export const ADD_PRODUCT = 'ADD_PRODUCT';
 export const GET_PRODUCT = 'GET_PRODUCT';
@@ -9,8 +9,7 @@ export const UPDATE_PRODUCT = 'UPDATE_PRODUCT';
 export const DELETE_PRODUCT = 'DELETE_PRODUCT';
 
 // Use the correct URL for React Native emulator
-const API_URL = 'https://growfoodapi.onrender.com/api/products';
-// const API_URL = 'http://localhost:5000/api/products';
+const API_URL = productsAPi;
 
 export const getProducts = () => async dispatch => {
   try {

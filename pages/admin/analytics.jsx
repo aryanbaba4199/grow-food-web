@@ -19,31 +19,31 @@ const Admin = () => {
 
 
 
-      <div className="flex gap-2 flex-wrap items-center container px-8 py-4 ">
+      <div className="flex md:flex-row flex-col gap-2 flex-wrap items-center container px-8 py-4 ">
         <div
           onClick={() => setIndex(0)}
-          className={`flex-1 hover:cursor-pointer shadow-sm shadow-black hover:shadow-md  hover:border-2 active:bg-green-600  h-28 bg-[#1e4426] text-white rounded-md flex flex-col justify-center items-center`}
+          className={`flex-1 md:w-auto w-full hover:cursor-pointer shadow-sm shadow-black hover:shadow-md  hover:border-2 active:bg-green-600  h-28 bg-[#1e4426] text-white rounded-md flex py-2 gap-4 justify-center items-center`}
         >
           <MdOutlineProductionQuantityLimits className="text-3xl text-orange-400" />
           <span className="text-xl">Create Product</span>
         </div>
         <div
           onClick={() => setIndex(1)}
-          className={`flex-1 hover:cursor-pointer shadow-sm shadow-black hover:shadow-md  hover:border-2 active:bg-green-600  h-28 bg-[#1e4426] text-white rounded-md flex flex-col justify-center items-center`}
+          className={`flex-1 hover:cursor-pointer md:w-auto w-full shadow-sm shadow-black hover:shadow-md  hover:border-2 active:bg-green-600  h-28 bg-[#1e4426] text-white rounded-md flex py-2 gap-4 justify-center items-center`}
         >
           <MdOutlineProductionQuantityLimits className="text-3xl text-orange-400" />
           <span className="text-xl">Orders</span>
         </div>
         <div
           onClick={() => setIndex(2)}
-          className={`flex-1 hover:cursor-pointer shadow-sm shadow-black hover:shadow-md  hover:border-2 active:bg-green-600  h-28 bg-[#1e4426] text-white rounded-md flex flex-col justify-center items-center`}
+          className={`flex-1  hover:cursor-pointer md:w-auto w-full shadow-sm shadow-black hover:shadow-md  hover:border-2 active:bg-green-600  h-28 bg-[#1e4426] text-white rounded-md flex py-2 gap-4   justify-center items-center`}
         >
           <MdOutlineProductionQuantityLimits className="text-3xl text-orange-400" />
           <span className="text-xl">Create Brand</span>
         </div>
         <div
           onClick={() => setIndex(3)}
-          className={`flex-1 hover:cursor-pointer shadow-sm shadow-black hover:shadow-md  hover:border-2 active:bg-green-600  h-28 bg-[#1e4426] text-white rounded-md flex flex-col justify-center items-center`}
+          className={`flex-1 hover:cursor-pointer md:w-auto w-full shadow-sm shadow-black hover:shadow-md  hover:border-2 active:bg-green-600  h-28 bg-[#1e4426] text-white rounded-md flex py-2 gap-4  justify-center items-center`}
         >
           <MdOutlineProductionQuantityLimits className="text-3xl text-orange-400" />
           <span className="text-xl">Create Category</span>
