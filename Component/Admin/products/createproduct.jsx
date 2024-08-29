@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct } from "@/Api";
+import { createProduct, createUnit } from "@/Api";
 import axios from "axios";
 
-import { getBrands, getCategories } from "@/Redux/actions/productActions"; // Adjust the import path as needed
+import { getBrands, getCategories, getUnit } from "@/Redux/actions/productActions"; // Adjust the import path as needed
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import { Box, Typography } from "@mui/material";
+import { Autocomplete, Box, Typography } from "@mui/material";
 import Image from "next/image";
 import Swal from "sweetalert2";
+import { unitMeasureData } from "@/Context/projectData";
 
 const CreateProduct = ({ setIndex }) => {
   const defaultFormData = {
@@ -34,18 +35,22 @@ const CreateProduct = ({ setIndex }) => {
   const dispatch = useDispatch();
   const brands = useSelector((state) => state.products.brands);
   const categories = useSelector((state) => state.products.categories);
-
+  const unitsData = useSelector((state) => state.products.units)
   const [image, setImage] = useState("");
+  const [units, setUnits] = useState(["Create Unit"])
   const [imageId, setImageId] = useState("");
   const [tempImageUrl, setTempImageURL] = useState("");
   const [productData, setProductData] = useState(defaultFormData);
   const [errorField, setErrorField] = useState([]);
   const [filteredBrands, setFilteredBrands] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
+  
+
 
   useEffect(() => {
     dispatch(getBrands());
     dispatch(getCategories());
+    dispatch(getUnit());
   }, [dispatch]);
 
   useEffect(() => {
@@ -56,27 +61,19 @@ const CreateProduct = ({ setIndex }) => {
     setFilteredCategories(categories);
   }, [categories]);
 
+  useEffect(()=>{
+    const unitNames = unitsData.map(unit => unit.name);
+    setUnits([...unitNames, "Create Unit"]);
+     console.log(units);
+  }, [unitsData])
+
   const handleChange = (e) => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
   };
 
-  const handleBrandChange = (e) => {
-    const value = e.target.value;
-    setProductData({ ...productData, brand: value });
-    const filtered = brands.filter((brand) =>
-      brand.name.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredBrands(filtered.length > 0 ? filtered : [{ name: value }]);
-  };
+  
 
-  const handleCategoryChange = (e) => {
-    const value = e.target.value;
-    setProductData({ ...productData, categories: value });
-    const filtered = categories.filter((category) =>
-      category.name.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredCategories(filtered.length > 0 ? filtered : [{ name: value }]);
-  };
+  
 
   const handleSubmit = async () => {
     try {
@@ -98,6 +95,7 @@ const CreateProduct = ({ setIndex }) => {
           price: 0,
           sellingPrice: 0,
           productQty: "",
+          unit : "",
           minimumOrderQty: 0,
           availableQty: 0,
           foodPrefence: "",
@@ -155,10 +153,10 @@ const CreateProduct = ({ setIndex }) => {
   const handleUploadImage = async (e) => {
     e.preventDefault();
     validateFormData();
-    console.log(errorField.length)
-    if(errorField.length>0){
+    console.log(errorField.length);
+    if (errorField.length > 0) {
       return;
-    }else{
+    } else {
       try {
         const formData = new FormData();
         formData.append("file", image);
@@ -167,24 +165,21 @@ const CreateProduct = ({ setIndex }) => {
           `https://api.cloudinary.com/v1_1/dvhuttonp/image/upload`,
           formData
         );
-  
+
         const climageUrl = cloudinaryResponse.data.secure_url;
         setImageId(cloudinaryResponse.data.public_id);
-  
+
         setProductData((prevData) => ({ ...prevData, image: climageUrl }));
-  
+
         // Call handleSubmit after the image is uploaded
         await handleSubmit();
       } catch (e) {
         console.error(e);
         await removeImage();
       }
-  
-      setTempImageURL("");
-      
-    }
 
-    
+      setTempImageURL("");
+    }
   };
 
   const sellingPriceCalculator = () => {
@@ -206,14 +201,12 @@ const CreateProduct = ({ setIndex }) => {
       </Typography>
       <form onSubmit={handleUploadImage} className="space-y-4">
         <div className="mb-6 flex flex-row px-2  justify-between">
-          
           <input
             type="file"
             accept="image/*"
             className="px-2 text-black"
             onChange={handleImageChange}
             required
-
           />
           {tempImageUrl !== "" && (
             <Image
@@ -249,68 +242,81 @@ const CreateProduct = ({ setIndex }) => {
             value={productData.description}
             onChange={handleChange}
             error={errorField.includes("description")} // Check if 'name' is in errorField
-            helperText={errorField.includes("description") ? "description is required" : ""}
+            helperText={
+              errorField.includes("description")
+                ? "description is required"
+                : ""
+            }
             className="mb-4"
           />
-          <TextField
-            label="Brand"
-            name="brand"
-            variant="outlined"
-            fullWidth
+          <Autocomplete
+            options={filteredBrands.map((brand) => brand.name)} // List of brands
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Brand"
+                name="brand"
+                variant="outlined"
+                fullWidth
+                className="mb-4"
+                error={errorField.includes("brand")} // Check if 'brand' is in errorField
+                helperText={
+                  errorField.includes("brand") ? "Brand is required" : ""
+                }
+              />
+            )}
+            onInputChange={(event, newValue) => {
+              setProductData({ ...productData, brand: newValue });
+            }}
             value={productData.brand}
-            onChange={handleBrandChange}
-            className="mb-4"
-            error={errorField.includes("brand")} // Check if 'name' is in errorField
-            helperText={errorField.includes("brand") ? "brand is required" : ""}
-            select
-          >
-            {filteredBrands.map((brand) => (
-              <MenuItem key={brand._id || brand.name} value={brand.name}>
-                {brand.name}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
+            freeSolo // Allow typing a custom value
+          />
+
+          <Autocomplete
+            options={filteredCategories.map((item)=>item.name)}
+            renderInput={(params)=>(
+              <TextField
+              {...params}
             label="Category"
             name="categories"
             variant="outlined"
             fullWidth
-            value={productData.categories}
-            onChange={handleCategoryChange}
+            
             className="mb-4"
             error={errorField.includes("categories")} // Check if 'name' is in errorField
-            helperText={errorField.includes("categories") ? "Category is required" : ""}
-            select
+            helperText={
+              errorField.includes("categories") ? "Category is required" : ""
+            }
+            />
+          
+            )}
+            onInputChange={(event, value)=>{
+              setProductData({...productData, categories : value})
+            }}
+            value={productData.categories}
+            freeSolo
           >
-            {filteredCategories.map((category) => (
-              <MenuItem
-                key={category._id || category.name}
-                value={category.name}
-              >
-                {category.name}
-              </MenuItem>
-            ))}
-          </TextField>
+
+
+          </Autocomplete>
+
+          
           <TextField
             label="Sub-Category"
             name="subCategory"
             variant="outlined"
             fullWidth
             error={errorField.includes("subCategory")}
-            helperText={errorField.includes("subCategory") ? "subCategory is required" : ""}
+            helperText={
+              errorField.includes("subCategory")
+                ? "subCategory is required"
+                : ""
+            }
             value={productData.subCategory}
             onChange={handleChange}
             className="mb-4"
           />
-          {/* <TextField
-          label="Image URL"
-          name="image"
-          variant="outlined"
-          fullWidth
-          value={productData.image}
-          onChange={handleChange}
-          className="mb-4"
-        /> */}
+          
           <TextField
             label="Discount"
             name="discount"
@@ -318,14 +324,16 @@ const CreateProduct = ({ setIndex }) => {
             fullWidth
             type="number"
             error={errorField.includes("discount")}
-            helperText={errorField.includes("discount") ? "discount is required" : ""}
+            helperText={
+              errorField.includes("discount") ? "discount is required" : ""
+            }
             value={productData.discount}
             onChange={handleChange}
             className="mb-4"
           />
           <TextField
-          error={errorField.includes("price")}
-          helperText={errorField.includes("price") ? "price is required" : ""}
+            error={errorField.includes("price")}
+            helperText={errorField.includes("price") ? "price is required" : ""}
             label="Price"
             name="price"
             variant="outlined"
@@ -337,8 +345,12 @@ const CreateProduct = ({ setIndex }) => {
             onBlurCapture={sellingPriceCalculator}
           />
           <TextField
-          error={errorField.includes("sellingPrice")}
-          helperText={errorField.includes("sellingPrice") ? "Selling Price is required" : ""}
+            error={errorField.includes("sellingPrice")}
+            helperText={
+              errorField.includes("sellingPrice")
+                ? "Selling Price is required"
+                : ""
+            }
             label="Selling Price"
             name="sellingPrice"
             variant="outlined"
@@ -348,21 +360,81 @@ const CreateProduct = ({ setIndex }) => {
             onChange={handleChange}
             className="mb-4"
           />
-          <TextField
-          error={errorField.includes("unit")}
-          helperText={errorField.includes("unit") ? "Unit is required" : ""}
+          <Autocomplete
+          options={units}
+          renderInput={(params)=>(
+            <TextField
+            {...params}
+            error={errorField.includes("unit")}
+            helperText={errorField.includes("unit") ? "Unit is required" : ""}
             label="Product Unit"
             name="unit"
             variant="outlined"
             fullWidth
-            value={productData.unit}
-            onChange={handleChange}
             className="mb-4"
           />
+          )}
+          onInputChange={(e, value)=>{
+            if(value=='Create Unit'){
+              Swal.fire({
+                title: 'Create',
+                icon: 'info',
+                input :'text',
+                inputAutoFocus: true,
+                inputLabel : "Enter unit Name",
+                showCancelButton : true,
+                showConfirmButton: true,
+                confirmButtonText : 'Submit', 
+                inputValidator: (inputValue) => {
+                  if (!inputValue) {
+                    return "Please enter a unit name!";
+                  }
+                  return null; // Return null if the input is valid
+                },
+              }).then(async(result)=>{
+                if(result.isConfirmed){
+                 
+                    try{
+                      const res = await axios.post(createUnit, {formData : result.value})
+                      if(res.status===200){
+                        Swal.fire({
+                          title : 'success',
+                          icon : 'success',
+                          text : "Unit Created Successfully",
+                        })
+                        dispatch(getUnit())
+                      }
+                    }catch(err){
+                      console.error(err);
+                      Swal.fire(err.message);
+                    }
+                }
+              })
+            }else{
+              setProductData({...productData, unit : value});
+            }
+            
+            
+          }}
+          onSelect={(event)=>{
+            if(event.target.value==='Create Unit'){
+              console.log("Ji", event.target.value)
+            }
+          }}
+          value={productData.unit}
+          freeSolo
+          >
+
+          </Autocomplete>
+          
           <TextField
             label="Product Quantity"
             error={errorField.includes("productQty")}
-            helperText={errorField.includes("productQty") ? "Product quantity is required" : ""}
+            helperText={
+              errorField.includes("productQty")
+                ? "Product quantity is required"
+                : ""
+            }
             name="productQty"
             variant="outlined"
             fullWidth
@@ -371,8 +443,12 @@ const CreateProduct = ({ setIndex }) => {
             className="mb-4"
           />
           <TextField
-          error={errorField.includes("minimumOrderQty")}
-          helperText={errorField.includes("minimumOrderQty") ? "Minimum Order quantity is required" : ""}
+            error={errorField.includes("minimumOrderQty")}
+            helperText={
+              errorField.includes("minimumOrderQty")
+                ? "Minimum Order quantity is required"
+                : ""
+            }
             label="Minimum Order Quantity"
             name="minimumOrderQty"
             variant="outlined"
@@ -385,7 +461,11 @@ const CreateProduct = ({ setIndex }) => {
           <TextField
             label="Packet Quantity"
             error={errorField.includes("incDecBy")}
-            helperText={errorField.includes("incDecBy") ? "Packet quantity is required" : ""}
+            helperText={
+              errorField.includes("incDecBy")
+                ? "Packet quantity is required"
+                : ""
+            }
             name="incDecBy"
             variant="outlined"
             fullWidth
@@ -396,7 +476,11 @@ const CreateProduct = ({ setIndex }) => {
           />
           <TextField
             error={errorField.includes("availableQty")}
-            helperText={errorField.includes("availableQty") ? "Available quantity is required" : ""}
+            helperText={
+              errorField.includes("availableQty")
+                ? "Available quantity is required"
+                : ""
+            }
             label="Available Quantity"
             name="availableQty"
             variant="outlined"

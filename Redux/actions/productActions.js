@@ -7,6 +7,8 @@ export const GET_BRANDS = 'GET_BRANDS';
 export const GET_CATEGORY = 'GET_CATEGORY';
 export const UPDATE_PRODUCT = 'UPDATE_PRODUCT';
 export const DELETE_PRODUCT = 'DELETE_PRODUCT';
+export const GET_UNIT = 'GET_UNIT';
+
 
 // Use the correct URL for React Native emulator
 const API_URL = productsAPi;
@@ -53,6 +55,17 @@ export const getCategories = () => async dispatch => {
     console.error('Error fetching categories', err);
   }
 };
+
+export const getUnit = ()=>async dispatch =>{
+  try{
+    const res = await axios.get(`${API_URL}/getUnit`);
+    dispatch({type : GET_UNIT, payload: res.data});
+  }catch(err){
+    console.error('Error fetching unit', err);
+  };
+}
+
+
 
 
 export const addProduct = (productData) => async dispatch => {

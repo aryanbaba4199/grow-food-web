@@ -38,6 +38,8 @@ export const getProductbyId = `${apiurl}/api/products/product`
 export const createProduct = `${apiurl}/api/products`
 export const updateBrandbyId = `${apiurl}/api/products/updateBrand`
 export const deleteBrandbyId = `${apiurl}/api/products/deleteBrand`
+export const createUnit = `${apiurl}/api/products/createUnit`
+export const getUnit = `${apiurl}/api/products/getUnit`
 
 
 
