@@ -13,6 +13,9 @@ import Loader from "../../helpers/loader";
 import { API_URL } from "@/Api";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "@/Redux/actions/productActions";
+import Swal from "sweetalert2";
+import { uploadImageToCloudinary } from "@/Context/functions";
+import { FaPlus } from "react-icons/fa";
 
 const CreateCategory = () => {
   const [categoryName, setCategoryName] = useState("");
@@ -23,39 +26,26 @@ const CreateCategory = () => {
   const [editMode, setEditMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [open, setOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
 
   const dispatch = useDispatch();
+  const categories = useSelector((state) => state.products.categories);
 
   useEffect(() => {
     dispatch(getCategories());
   }, [dispatch]);
 
-  const categories = useSelector((state) => state.products.categories);
-
   const handleImageUpload = async () => {
-    setLoader(true);
-    const formData = new FormData();
-    formData.append("file", icon);
-    formData.append("upload_preset", "ml_default");
-
+    if (!icon) return "";
     try {
-      const res = await axios.post(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        formData
-      );
-
-      if (res.data.url) {
-        setIconURL(res.data.url);
-        console.log("Image uploaded successfully. URL:", res.data.url);
+      const imageData = await uploadImageToCloudinary(icon);
+      if (imageData.response) {
+        return imageData.data.url;
       }
-      setLoader(false);
-      return res.data.url;
     } catch (err) {
       console.error("Error uploading image", err);
-      alert("Failed to upload image");
-      setLoader(false);
+      Swal.fire("Error", "Error uploading image", "error");
     }
+    return "";
   };
 
   const handleSubmit = async (e) => {
@@ -70,21 +60,73 @@ const CreateCategory = () => {
       });
 
       if (res.status === 200) {
-        alert("Category created successfully");
-        setCategoryName("");
-        setIcon(null);
-        setIconURL("");
-        setTempIconURL("");
-        dispatch(getCategories()); // Refresh the categories list
+        Swal.fire("Success", "Category created successfully", "success");
+        resetForm();
+        dispatch(getCategories());
       } else {
-        alert("Failed to create category");
+        Swal.fire("Error", "Failed to create category", "error");
       }
-      setLoader(false);
     } catch (err) {
       console.error("Error creating category", err);
-      alert("Failed to create category");
+      Swal.fire("Error", "Failed to create category", "error");
+    } finally {
       setLoader(false);
     }
+  };
+
+  const handleUpdate = async () => {
+    setLoader(true);
+    try {
+      const uploadedUrl = await handleImageUpload();
+      const res = await axios.put(
+        `${API_URL}/api/products/updateCategory/${selectedCategory._id}`,
+        { name: categoryName, icon: uploadedUrl || selectedCategory.icon }
+      );
+      if (res.status === 200) {
+        Swal.fire("Success", "Category updated successfully", "success");
+        resetForm();
+        dispatch(getCategories());
+      } else {
+        Swal.fire("Error", "Failed to update category", "error");
+      }
+    } catch (err) {
+      console.error("Error updating category", err);
+      Swal.fire("Error", err.message, "error");
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedCategory) return;
+    setLoader(true);
+    try {
+      const res = await axios.delete(
+        `${API_URL}/api/products/deleteCategory/${selectedCategory._id}`
+      );
+      if (res.status === 200) {
+        Swal.fire("Success", "Category deleted successfully", "success");
+        resetForm();
+        dispatch(getCategories());
+      } else {
+        Swal.fire("Error", "Failed to delete category", "error");
+      }
+    } catch (err) {
+      console.error("Error deleting category", err);
+      Swal.fire("Error", "Failed to delete category", "error");
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  const resetForm = () => {
+    setCategoryName("");
+    setIcon(null);
+    setIconURL("");
+    setTempIconURL("");
+    setSelectedCategory(null);
+    setOpen(false);
+    setEditMode(false);
   };
 
   const handleImageChange = (e) => {
@@ -105,103 +147,42 @@ const CreateCategory = () => {
     setOpen(true);
   };
 
-  const handleDelete = async () => {
-    if (selectedCategory) {
-      setLoader(true);
-      try {
-        const res = await axios.delete(
-          `${API_URL}/products/deleteCategory/${selectedCategory._id}`
-        );
-        if (res.status === 200) {
-          alert("Category deleted successfully");
-          setSelectedCategory(null);
-          setOpen(false);
-          dispatch(getCategories()); 
-        } else {
-          alert("Failed to delete category");
-        }
-        setLoader(false);
-      } catch (err) {
-        console.error("Error deleting category", err);
-        alert("Failed to delete category");
-        setLoader(false);
-      }
-    }
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setCreating(false);
-    setEditMode(false);
-    setCategoryName("");
-    setIcon(null);
-    setIconURL("");
-    setTempIconURL("");
-  };
-
-  const handleUpdate = async() => {
-    handleImageUpload();
-    try{
-      const res = await axios.put(`${API_URL}/products/updateCategory/${selectedCategory._id}0`, {name: categoryName,
-        icon: uploadedUrl,})
-      if(res.status===200){
-        alert("Category updated successfully")
-      }else{
-        alert("Category not updated")
-      }
-    }catch(err){
-      console.log(err)
-      alert("Error updating category")
-    }
-  };
-
   return (
     <div>
       <div className="px-8">
       <Typography variant="h4" className="mb-4 flex justify-center items-center ">
-        <span className="bg-[#1e4426] rounded-s-md px-4 text-white">Create Product</span>
-      </Typography>
-        <div className="grid md:grid-cols-6 items-center mt-8 gap-2">
+          <p className="flex bg-color-1 rounded-sm">
+          <span className="rounded-s-md bg-color-1 h-10 px-4">Category</span>
+          <FaPlus onClick={()=>setOpen(true)} className="mx-2 my-1 hover:cursor-pointer bg-white text-green-700 rounded-full"/>
+          </p>
+        </Typography>
+        <div className="flex flex-wrap justify-between gap-4 items-center mt-8">
           {categories.map((item, index) => (
             <div
               key={index}
-              className="w-44 h-28 py-2 border shadow-md shadow-black flex flex-col justify-center items-center cursor-pointer"
+              className="w-32 h-28 flex-1 pt-2 border shadow-md shadow-black flex flex-col justify-center items-center cursor-pointer"
               onClick={() => handleEdit(item)}
             >
               <img
-                src={
-                  item?.icon ||
-                  "https://media.designrush.com/inspiration_images/134802/conversions/_1511456315_653_apple-desktop.jpg"
-                }
-                className="w-24 h-24"
+                src={item?.icon || "https://via.placeholder.com/150"}
+                className="w-20 h-16 rounded-md"
               />
-              <span>{item.name}</span>
+              <span className="mt-2 w-full bg-color-1 text-center">{item.name}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex justify-center items-center mt-8">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setCreating(true)}
-        >
-          Create Category
-        </Button>
-      </div>
+     
 
-      <Dialog open={creating || editMode} onClose={handleClose}>
-        <DialogTitle>
-          {editMode ? "Edit Category" : "Create Category"}
-        </DialogTitle>
+      <Dialog open={open} onClose={resetForm}>
+        <DialogTitle>{editMode ? "Edit Category" : "Create Category"}</DialogTitle>
         <DialogContent>
           <div className="flex flex-col space-y-12">
             <TextField
-              style={{marginTop : 8}}
+              style={{ marginTop: 8 }}
               label="Category Name"
               variant="outlined"
-              className=""
               fullWidth
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
@@ -209,29 +190,24 @@ const CreateCategory = () => {
             <input type="file" onChange={handleImageChange} />
             {tempIconURL && (
               <div className="flex justify-center items-center mt-4">
-                <img
-                  src={tempIconURL}
-                  alt="Category Icon"
-                  className="w-20 h-20"
-                />
+                <img src={tempIconURL} alt="Category Icon" className="w-20 h-20" />
               </div>
             )}
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">
+          <Button onClick={resetForm} color="secondary">
             Close
           </Button>
           {editMode ? (
             <>
               <Button onClick={handleUpdate} color="info">
-              Update
-            </Button>
-            <Button onClick={handleDelete} color="error">
-              Delete
-            </Button>
+                Update
+              </Button>
+              <Button onClick={handleDelete} color="error">
+                Delete
+              </Button>
             </>
-            
           ) : (
             <Button onClick={handleSubmit} color="primary">
               Create

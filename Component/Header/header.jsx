@@ -15,10 +15,14 @@ import Profile from "../user/profile";
 import { gf_colors } from "@/constants";
 import UserContext from "@/userContext";
 import { CiMenuKebab } from "react-icons/ci";
+import { FaDatabase } from "react-icons/fa";
+
+import { getProducts } from "@/Redux/actions/productActions";
 
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+ 
   const {user, token } = useContext(UserContext);
   const [menu, setMenu] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -29,9 +33,13 @@ const Header = () => {
   useEffect(() => {
     if (token) {
       dispatch(fetchUserDetails());
+      dispatch(getProducts())
     }
     setIsMounted(true);
   }, [dispatch, token]);
+
+  const products = useSelector((state) => state.products.products);
+
 
   const handleSignOut = () => {
     try {
@@ -76,9 +84,9 @@ const Header = () => {
             </Link>
           </div>
           <div className="md:w-[30%] w-[80%]">
-            <Search />
+            <Search products = {products} />
           </div>
-          <div>
+          <div className="md:absolute right-1">
           {userDetails?.user?.email === "aryanbaba4199@gmail.com" && (
               <CiMenuKebab
                 onClick={() => setIsAdmin(!isAdmin)}
@@ -86,12 +94,18 @@ const Header = () => {
               />
             )}
           </div>
-          <div className="md:flex hidden justify-start ml-12 items-center gap-12 w-[50%] ">
+          <div className="md:flex hidden justify-start ml-12 items-center gap-8 w-[50%] ">
             <Link href="/" className="flex gap-2 ">
               <span>
                 <FaHome className={`${gf_colors.primary_Icon_Color} mt-1`} />
               </span>
               <span>Home</span>
+            </Link>
+            <Link href="/products" className="flex gap-2 ">
+              <span>
+                <FaDatabase className={`${gf_colors.primary_Icon_Color} mt-1`} />
+              </span>
+              <span>Products</span>
             </Link>
             <Link href="/cart" className="flex gap-2 ">
               <span>
@@ -134,7 +148,7 @@ const Header = () => {
                   className="flex gap-2 "
                   onClick={() => setShowProfile(true)}
                 >
-                  <span className="mt-1 text-blue-800">
+                  <span className="mt-1">
                     <MdAdminPanelSettings />
                   </span>
                   <span>Profile</span>
@@ -162,6 +176,16 @@ const Header = () => {
                   <FaHome className="mt-1 text-yellow-500" />
                 </span>
                 <span>Home</span>
+              </Link>
+              <Link
+                href="/products"
+                onClick={() => setUserMenu(false)}
+                className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%]"
+              >
+                <span>
+                  <FaCartPlus className="mt-1 text-yellow-500" />
+                </span>
+                <span>Products</span>
               </Link>
               <Link
                 href="/cart"

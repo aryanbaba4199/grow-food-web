@@ -3,16 +3,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { createProduct, createUnit } from "@/Api";
 import axios from "axios";
 
-import { getBrands, getCategories, getUnit } from "@/Redux/actions/productActions"; // Adjust the import path as needed
+import {
+  getBrands,
+  getCategories,
+  getUnit,
+} from "@/Redux/actions/productActions"; // Adjust the import path as needed
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import { Autocomplete, Box, Typography } from "@mui/material";
+import { Autocomplete, Box, Typography, Grid } from "@mui/material";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import { unitMeasureData } from "@/Context/projectData";
+import deleteImageFromCloudinary, {
+  uploadImageToCloudinary,
+} from "@/Context/functions";
 
-const CreateProduct = ({ setIndex }) => {
+const CreateProduct = ({ setIndex, setCreateMode }) => {
   const defaultFormData = {
     name: "",
     description: "",
@@ -35,17 +42,16 @@ const CreateProduct = ({ setIndex }) => {
   const dispatch = useDispatch();
   const brands = useSelector((state) => state.products.brands);
   const categories = useSelector((state) => state.products.categories);
-  const unitsData = useSelector((state) => state.products.units)
+  const unitsData = useSelector((state) => state.products.units);
   const [image, setImage] = useState("");
-  const [units, setUnits] = useState(["Create Unit"])
+  const [units, setUnits] = useState(["Create Unit"]);
   const [imageId, setImageId] = useState("");
   const [tempImageUrl, setTempImageURL] = useState("");
   const [productData, setProductData] = useState(defaultFormData);
   const [errorField, setErrorField] = useState([]);
   const [filteredBrands, setFilteredBrands] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
-  
-
+  const [discountType, setDiscountType] = useState(0);
 
   useEffect(() => {
     dispatch(getBrands());
@@ -61,19 +67,21 @@ const CreateProduct = ({ setIndex }) => {
     setFilteredCategories(categories);
   }, [categories]);
 
-  useEffect(()=>{
-    const unitNames = unitsData.map(unit => unit.name);
+  useEffect(() => {
+    const unitNames = unitsData.map((unit) => unit.name);
     setUnits([...unitNames, "Create Unit"]);
-     console.log(units);
-  }, [unitsData])
+    console.log(units);
+  }, [unitsData]);
 
   const handleChange = (e) => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
   };
 
-  
-
-  
+  // useEffect(()=>{
+  //   if(imageId!=='' && errorField.length===0){
+  //     handleSubmit();
+  //   }
+  // }, [imageId, errorField.length])
 
   const handleSubmit = async () => {
     try {
@@ -95,7 +103,7 @@ const CreateProduct = ({ setIndex }) => {
           price: 0,
           sellingPrice: 0,
           productQty: "",
-          unit : "",
+          unit: "",
           minimumOrderQty: 0,
           availableQty: 0,
           foodPrefence: "",
@@ -103,7 +111,7 @@ const CreateProduct = ({ setIndex }) => {
         });
       }
     } catch (e) {
-      await removeImage();
+      await deleteImageFromCloudinary(imageId);
       console.log("Failed to upload");
       Swal.fire({
         title: "Error",
@@ -115,18 +123,6 @@ const CreateProduct = ({ setIndex }) => {
 
   const onEnterFocudNext = (e, id) => {
     if (e.key === "Enter" || e.key == "Tab") document.getElementById(id);
-  };
-
-  const removeImage = async () => {
-    try {
-      await axios.delete(
-        `https://api.cloudinary.com/v1_1/dvhuttonp/image/destroy`,
-        { public_id: imageId }
-      );
-      console.log("Image deleted from Cloudinary");
-    } catch (e) {
-      console.error("Error deleting image from Cloudinary:", e);
-    }
   };
 
   const handleImageChange = (e) => {
@@ -143,50 +139,69 @@ const CreateProduct = ({ setIndex }) => {
 
     for (let field in productData) {
       if (productData[field] === defaultFormData[field]) {
+        console.log(field);
+
         errors.push(field);
       }
     }
+    console.log(errors);
 
     setErrorField(errors);
+    console.log(errorField.length);
+    if (errors.length === 0) {
+      handleSubmit();
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Required fields are blank",
+      });
+    }
   };
 
-  const handleUploadImage = async (e) => {
-    e.preventDefault();
-    validateFormData();
-    console.log(errorField.length);
-    if (errorField.length > 0) {
+  const handleUploadImage = async () => {
+    if (image === "") {
+      Swal.fire({
+        title: "Please Select a Image",
+        icon: "warning",
+      });
       return;
-    } else {
-      try {
-        const formData = new FormData();
-        formData.append("file", image);
-        formData.append("upload_preset", "dreamplanner4199");
-        const cloudinaryResponse = await axios.post(
-          `https://api.cloudinary.com/v1_1/dvhuttonp/image/upload`,
-          formData
-        );
+    }
 
-        const climageUrl = cloudinaryResponse.data.secure_url;
-        setImageId(cloudinaryResponse.data.public_id);
-
-        setProductData((prevData) => ({ ...prevData, image: climageUrl }));
-
-        // Call handleSubmit after the image is uploaded
-        await handleSubmit();
-      } catch (e) {
-        console.error(e);
-        await removeImage();
+    try {
+      const imageData = await uploadImageToCloudinary(image);
+      console.log(imageData);
+      if (imageData.response === true) {
+        setProductData((prevData) => ({
+          ...prevData,
+          image: imageData.data.url,
+        }));
+        setImageId(imageData.data.public_id);
+        validateFormData();
+      } else {
+        Swal.fire({
+          title: "Image Error",
+          icon: "error",
+          text: imageData.data,
+        });
       }
-
+    } catch (e) {
+      console.error(e);
+      await deleteImageFromCloudinary(imageId);
       setTempImageURL("");
     }
   };
 
   const sellingPriceCalculator = () => {
+    alert(discountType);
     const price = productData.price;
     const discount = productData.discount;
-    const x = price - (price * discount) / 100;
-    setProductData({ ...productData, sellingPrice: x });
+    if (discountType == "0") {
+      const x = price - (price * discount) / 100;
+      setProductData({ ...productData, sellingPrice: x });
+    } else if (discountType == "1") {
+      const x = price - discount;
+      setProductData({ ...productData, sellingPrice: x });
+    }
   };
 
   return (
@@ -199,7 +214,7 @@ const CreateProduct = ({ setIndex }) => {
           Create Product
         </span>
       </Typography>
-      <form onSubmit={handleUploadImage} className="space-y-4">
+      <div className="space-y-4">
         <div className="mb-6 flex flex-row px-2  justify-between">
           <input
             type="file"
@@ -273,34 +288,30 @@ const CreateProduct = ({ setIndex }) => {
           />
 
           <Autocomplete
-            options={filteredCategories.map((item)=>item.name)}
-            renderInput={(params)=>(
+            options={filteredCategories.map((item) => item.name)}
+            renderInput={(params) => (
               <TextField
-              {...params}
-            label="Category"
-            name="categories"
-            variant="outlined"
-            fullWidth
-            
-            className="mb-4"
-            error={errorField.includes("categories")} // Check if 'name' is in errorField
-            helperText={
-              errorField.includes("categories") ? "Category is required" : ""
-            }
-            />
-          
+                {...params}
+                label="Category"
+                name="categories"
+                variant="outlined"
+                fullWidth
+                className="mb-4"
+                error={errorField.includes("categories")} // Check if 'name' is in errorField
+                helperText={
+                  errorField.includes("categories")
+                    ? "Category is required"
+                    : ""
+                }
+              />
             )}
-            onInputChange={(event, value)=>{
-              setProductData({...productData, categories : value})
+            onInputChange={(event, value) => {
+              setProductData({ ...productData, categories: value });
             }}
             value={productData.categories}
             freeSolo
-          >
+          ></Autocomplete>
 
-
-          </Autocomplete>
-
-          
           <TextField
             label="Sub-Category"
             name="subCategory"
@@ -316,21 +327,41 @@ const CreateProduct = ({ setIndex }) => {
             onChange={handleChange}
             className="mb-4"
           />
-          
-          <TextField
-            label="Discount"
-            name="discount"
-            variant="outlined"
-            fullWidth
-            type="number"
-            error={errorField.includes("discount")}
-            helperText={
-              errorField.includes("discount") ? "discount is required" : ""
-            }
-            value={productData.discount}
-            onChange={handleChange}
-            className="mb-4"
-          />
+
+          <Grid container spacing={2} alignItems="center" className="mb-4">
+            {/* Dropdown for selecting discount type */}
+            <Grid item xs={3}>
+              <TextField
+                select
+                label="Type"
+                value={discountType}
+                onChange={(e) => setDiscountType(e.target.value)}
+                variant="outlined"
+                fullWidth
+              >
+                <MenuItem value="0">Percentage</MenuItem>
+                <MenuItem value="1">Rupees</MenuItem>
+              </TextField>
+            </Grid>
+
+            {/* Input for discount value */}
+            <Grid item xs={9}>
+              <TextField
+                label="Discount"
+                name="discount"
+                variant="outlined"
+                fullWidth
+                type="number"
+                error={errorField.includes("discount")}
+                helperText={
+                  errorField.includes("discount") ? "discount is required" : ""
+                }
+                value={productData.discount === 0 ? "" : productData.discount}
+                onChange={handleChange}
+              />
+            </Grid>
+          </Grid>
+
           <TextField
             error={errorField.includes("price")}
             helperText={errorField.includes("price") ? "price is required" : ""}
@@ -339,7 +370,7 @@ const CreateProduct = ({ setIndex }) => {
             variant="outlined"
             fullWidth
             type="number"
-            value={productData.price}
+            value={productData.price === 0 ? "" : productData.price}
             onChange={handleChange}
             className="mb-4"
             onBlurCapture={sellingPriceCalculator}
@@ -356,79 +387,81 @@ const CreateProduct = ({ setIndex }) => {
             variant="outlined"
             fullWidth
             type="number"
-            value={productData.sellingPrice}
+            value={
+              productData.sellingPrice === 0 ? "" : productData.sellingPrice
+            }
             onChange={handleChange}
+            disabled
             className="mb-4"
           />
           <Autocomplete
-          options={units}
-          renderInput={(params)=>(
-            <TextField
-            {...params}
-            error={errorField.includes("unit")}
-            helperText={errorField.includes("unit") ? "Unit is required" : ""}
-            label="Product Unit"
-            name="unit"
-            variant="outlined"
-            fullWidth
-            className="mb-4"
-          />
-          )}
-          onInputChange={(e, value)=>{
-            if(value=='Create Unit'){
-              Swal.fire({
-                title: 'Create',
-                icon: 'info',
-                input :'text',
-                inputAutoFocus: true,
-                inputLabel : "Enter unit Name",
-                showCancelButton : true,
-                showConfirmButton: true,
-                confirmButtonText : 'Submit', 
-                inputValidator: (inputValue) => {
-                  if (!inputValue) {
-                    return "Please enter a unit name!";
-                  }
-                  return null; // Return null if the input is valid
-                },
-              }).then(async(result)=>{
-                if(result.isConfirmed){
-                 
-                    try{
-                      const res = await axios.post(createUnit, {formData : result.value})
-                      if(res.status===200){
+            options={units}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                error={errorField.includes("unit")}
+                helperText={
+                  errorField.includes("unit") ? "Unit is required" : ""
+                }
+                label="Product Unit"
+                name="unit"
+                variant="outlined"
+                fullWidth
+                className="mb-4"
+              />
+            )}
+            onInputChange={(e, value) => {
+              if (value == "Create Unit") {
+                Swal.fire({
+                  title: "Create",
+                  icon: "info",
+                  input: "text",
+                  inputAutoFocus: true,
+                  inputLabel: "Enter unit Name",
+                  showCancelButton: true,
+                  showConfirmButton: true,
+                  confirmButtonText: "Submit",
+                  inputValidator: (inputValue) => {
+                    if (!inputValue) {
+                      return "Please enter a unit name!";
+                    }
+                    return null; // Return null if the input is valid
+                  },
+                }).then(async (result) => {
+                  if (result.isConfirmed) {
+                    try {
+                      const res = await axios.post(createUnit, {
+                        formData: result.value,
+                      });
+                      if (res.status === 200) {
                         Swal.fire({
-                          title : 'success',
-                          icon : 'success',
-                          text : "Unit Created Successfully",
-                        })
-                        dispatch(getUnit())
+                          title: "success",
+                          icon: "success",
+                          text: "Unit Created Successfully",
+                        });
+                        dispatch(getUnit());
                       }
-                    }catch(err){
+                    } catch (err) {
                       console.error(err);
                       Swal.fire(err.message);
                     }
-                }
-              })
-            }else{
-              setProductData({...productData, unit : value});
-            }
-            
-            
-          }}
-          onSelect={(event)=>{
-            if(event.target.value==='Create Unit'){
-              console.log("Ji", event.target.value)
-            }
-          }}
-          value={productData.unit}
-          freeSolo
-          >
+                  }
+                });
+              } else {
+                setProductData({ ...productData, unit: value });
+              }
+            }}
+            onSelect={(event) => {
+              if (event.target.value === "Create Unit") {
+                console.log("Ji", event.target.value);
+              }
+            }}
+            value={productData.unit}
+            freeSolo
+          ></Autocomplete>
 
-          </Autocomplete>
-          
           <TextField
-            label="Product Quantity"
+            label={`Product Quantity (${productData.unit})`}
             error={errorField.includes("productQty")}
             helperText={
               errorField.includes("productQty")
@@ -438,7 +471,7 @@ const CreateProduct = ({ setIndex }) => {
             name="productQty"
             variant="outlined"
             fullWidth
-            value={productData.productQty}
+            value={productData.productQty === 0 ? "" : productData.productQty}
             onChange={handleChange}
             className="mb-4"
           />
@@ -454,12 +487,16 @@ const CreateProduct = ({ setIndex }) => {
             variant="outlined"
             fullWidth
             type="number"
-            value={productData.minimumOrderQty}
+            value={
+              productData.minimumOrderQty === 0
+                ? ""
+                : productData.minimumOrderQty
+            }
             onChange={handleChange}
             className="mb-4"
           />
           <TextField
-            label="Packet Quantity"
+            label="Increase / Decrease by"
             error={errorField.includes("incDecBy")}
             helperText={
               errorField.includes("incDecBy")
@@ -470,7 +507,7 @@ const CreateProduct = ({ setIndex }) => {
             variant="outlined"
             fullWidth
             type="number"
-            value={productData.incDecBy}
+            value={productData.incDecBy === 0 ? "" : productData.incDecBy}
             onChange={handleChange}
             className="mb-4"
           />
@@ -486,7 +523,9 @@ const CreateProduct = ({ setIndex }) => {
             variant="outlined"
             fullWidth
             type="number"
-            value={productData.availableQty}
+            value={
+              productData.availableQty === 0 ? "" : productData.availableQty
+            }
             onChange={handleChange}
             className="mb-4"
           />
@@ -511,17 +550,23 @@ const CreateProduct = ({ setIndex }) => {
         </div>
         <div className="flex justify-between gap-2">
           <Button
-            onClick={() => setIndex("")}
+            onClick={() => {
+              setIndex ? setIndex("") : setCreateMode(false);
+            }}
             variant="contained"
             color="error"
           >
             Cancel
           </Button>
-          <Button type="submit" variant="contained" color="success">
+          <Button
+            onClick={handleUploadImage}
+            variant="contained"
+            color="success"
+          >
             Create Product
           </Button>
         </div>
-      </form>
+      </div>
     </Box>
   );
 };

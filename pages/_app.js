@@ -9,6 +9,7 @@ import Store from "@/Redux/store";
 
 
 export default function App({ Component, pageProps }) {
+  
   return (
     <>
       <ReduxProvider store={Store}>

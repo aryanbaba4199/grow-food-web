@@ -1,25 +1,21 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import ProductCard from "./productCard";
-import { getProducts } from "@/Redux/actions/productActions";
 import Banner from "./banner";
 import Loader from "../helpers/loader";
 import Slide from "./sliderMenu";
-import { getBrands } from "@/Redux/actions/productActions";
-import { getCategories } from "@/Redux/actions/productActions";
+
+import { useRouter } from "next/router";
 
 const Home = () => {
   const [filteredBrand, setFilteredBrand] = useState([]);
   const [isFilter, setIsFilter] = useState(false);
   
-  const dispatch = useDispatch();
+  const router = useRouter();
+  
   const productContainerRef = useRef(null); // Create a ref for the product container
 
-  useEffect(() => {
-    dispatch(getProducts());
-    dispatch(getCategories());
-    dispatch(getBrands());
-  }, [dispatch]);
+ 
 
   const products = useSelector((state) => state.products.products);
   const categories = useSelector((state) => state.products.categories);
@@ -59,6 +55,12 @@ const Home = () => {
           </div>
           <div className="flex mt-8 justify-between rounded-sm py-1 bg-gradient-to-r from-[#5fd579] via-[#19a232] to-[#1e4426] ">
             <span className="font-bold text-lg px-8">Special Products</span>
+            <span
+            onClick={()=>router.push({pathname : "/products", query :{
+              selectedProducts : JSON.stringify(products)
+            }})}
+            className="bg-color-1 px-8 hover:cursor-pointer"
+            >View All</span>
           </div>
           <div
             id="product-container"

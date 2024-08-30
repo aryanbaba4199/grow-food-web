@@ -198,11 +198,13 @@ const CreateBrand = () => {
           <FaPlus onClick={()=>setOpen(true)} className="mx-2 my-1 hover:cursor-pointer bg-white text-green-700 rounded-full"/>
           </p>
         </Typography>
-        <div className="grid md:grid-cols-6 items-center mt-8 gap-2">
+        <div className="flex flex-wrap gap-4 items-center mt-8 justify-between">
+          
           {brands.map((item, index) => (
+            <>
             <div
               key={index}
-              className="h-28 border shadow-md shadow-black flex flex-col justify-center items-center cursor-pointer"
+              className="h-28 flex-1 border shadow-md shadow-black flex flex-col justify-center items-center cursor-pointer"
               onClick={() => handleEdit(item)}
             >
               <img
@@ -212,8 +214,10 @@ const CreateBrand = () => {
                 }
                 className="w-24 h-20 rounded-lg"
               />
-              <span>{item.name}</span>
+              <span className="bg-color-1 w-full text-center px-4 mt-2">{item.name}</span>
             </div>
+            
+            </>
           ))}
         </div>
       </div>

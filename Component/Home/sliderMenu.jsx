@@ -31,7 +31,7 @@ const Slide = ({ products, title, timer, filter }) => {
           )}
         </div>
         <div className="flex items-end">
-          <button className="rounded-md px-2 text-white font-semibold">
+          <button onClick={()=>router.push("/products")} className="rounded-md hover:cursor-pointer px-2 text-white font-semibold">
             View All
           </button>
         </div>

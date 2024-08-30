@@ -1,5 +1,5 @@
-// const apiurl = 'http://localhost:5000'
-const apiurl = 'https://growfoodapi.onrender.com'
+const apiurl = 'http://localhost:5000'
+// const apiurl = 'https://growfoodapi.onrender.com'
 
 export const API_URL = apiurl;
 export const logo_uri = 'https://i.pinimg.com/736x/5d/90/4b/5d904b9f3b2f1a21c7ef3d19729598a3.jpg'
@@ -29,6 +29,7 @@ export const deleteOrderbyId = `${apiurl}/api/orders/deleteOrder`
 export const createCartbyUser = `${apiurl}/api/orders/createCart`
 export const getCartbyUser = `${apiurl}/api/orders/getCart`
 export const deleteCartItem = `${apiurl}/api/orders/deleteCart`
+
 
 
 

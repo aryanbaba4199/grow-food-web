@@ -1,16 +1,68 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
+import { Autocomplete, TextField, InputAdornment, Dialog } from '@mui/material';
+import ProductCard from '../Home/productCard';
+import ProductDetails from '../Home/productDetails';
 
-const Search = () => {
-  return (
-    <div className='flex w-full relative'>
-      <FaSearch className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
-      <input
-        className='w-full py-1 pl-10 pr-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-        placeholder='Search here'
-      />
-    </div>
+const Search = ({ products }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  // Function to handle search input change
+  const handleSearchChange = (event, value) => {
+    setSearchTerm(value);
+
+    const selectedProduct = products.find((item) => item.name.toLowerCase() === value.toLowerCase());
+    if (selectedProduct) {
+      setSelectedProduct(selectedProduct);
+      setOpen(true);
+    }
+  };
+
+  // Filtered products based on search term
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().startsWith(searchTerm.toLowerCase())
   );
-}
+
+  return (
+    <>
+      <Autocomplete
+        freeSolo
+        id="free-solo-2-demo"
+        disableClearable
+        options={filteredProducts.map((option) => option.name)}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            InputProps={{
+              ...params.InputProps,
+              type: 'search',
+              placeholder: "Search",
+              startAdornment: (
+                <InputAdornment position="start">
+                  <FaSearch style={{ color: '#1e4426', marginLeft: 8 }} />
+                </InputAdornment>
+              ),
+              
+              style: {
+                backgroundColor: '#f3f4f6',
+                color: 'black',
+                padding: 0,
+              },
+            }}
+          />
+        )}
+        onInputChange={handleSearchChange}
+      />
+      <Dialog open={open} fullScreen onClose={() => setOpen(false)}>
+        <ProductDetails
+          product={selectedProduct}
+          setOpen={setOpen}
+        />
+      </Dialog>
+    </>
+  );
+};
 
 export default Search;

@@ -16,12 +16,14 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
+import Swal from "sweetalert2";
 
 const Products = () => {
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [createMode, setCreateMode] = useState(false);
+  const [loader, setLoader] = useState(true);
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -44,23 +46,31 @@ const Products = () => {
   const deleteProduct = async (id) => {
     console.log("Deleted");
     try {
-      const res = await axios.delete(`${API_URL}/products/deleteProduct/${id}`);
+      const res = await axios.delete(
+        `${API_URL}/api/products/deleteProduct/${id}`
+      );
       if (res.status === 200) {
-        onclose();
-        alert("Product deleted successfully");
-      } else {
-        alert("Something went wrong");
+        Swal.fire({
+          title: "Deleted",
+          icon: "success",
+          text: "Product deleted successfully",
+        });
+        setOpen(false);
       }
     } catch (err) {
       console.log(err);
-      alert("Bad response");
+      Swal.fire({
+        title: "Failed",
+        icon: "error",
+        text: err.message,
+      });
     }
   };
 
   return (
     <>
-      {products ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+      {products.length !== 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {products?.map((item, index) => (
             <div
               key={index}
@@ -82,11 +92,11 @@ const Products = () => {
       )}
 
       {selectedProduct && (
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose} fullScreen={createMode}>
           {editMode ? (
             <EditProducts
               open={editMode}
-              onClose={() => setEditMode(false)}
+              setOpen={setOpen}
               product={selectedProduct}
             />
           ) : createMode ? (

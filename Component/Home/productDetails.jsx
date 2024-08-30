@@ -1,4 +1,4 @@
-import React, {useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
 import { FaStar } from "react-icons/fa";
 import { FaRupeeSign } from "react-icons/fa";
@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import UserContext from "@/userContext";
 
-import { Dialog,useMediaQuery, useTheme } from "@mui/material";
+import { Dialog, useMediaQuery, useTheme } from "@mui/material";
 import Checkout from "../checkout/checkout";
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaCircleMinus } from "react-icons/fa6";
@@ -22,7 +22,7 @@ import { createCartbyUser } from "@/Api";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 
-const ProductDetails = ({ product, setOpen }) => {
+const ProductDetails = ({ product, setOpen, cartQty }) => {
   const [index, setIndex] = useState(0);
   const [checkoutProduct, setCheckoutProduct] = useState("");
   const [cOpen, setCopen] = useState(false);
@@ -31,70 +31,71 @@ const ProductDetails = ({ product, setOpen }) => {
   const [qty, setQty] = useState(product.minimumOrderQty);
 
   const router = useRouter();
-  const {token, user} = useContext(UserContext)
+  const { token, user } = useContext(UserContext);
 
-  const handleCart = async() => {
-    if(token!==''){
-      const data = {userId : user?.user?._id, productId : product?._id};
-    try{
-        const res = await axios.post(`${createCartbyUser}`, 
-          {data}
-        );
-        if(res.status===200){
+  const handleCart = async () => {
+    if (token !== "") {
+      const data = {
+        userId: user?.user?._id,
+        productId: product?._id,
+        qty: qty,
+      };
+      try {
+        const res = await axios.post(`${createCartbyUser}`, { data });
+        if (res.status === 200) {
           Swal.fire({
-            title : 'Success',
-            icon : 'success',
-            text : 'Added to Cart Successfully...',
-            showClass : {
-              popup : 'true',
-            }
-          })
+            title: "Success",
+            icon: "success",
+            text: "Added to Cart Successfully...",
+            showClass: {
+              popup: "true",
+            },
+          });
         }
-        
-    }catch(e){
-      console.error(e);
+      } catch (e) {
+        console.error(e);
+        Swal.fire({
+          title: "Failed",
+          icon: "error",
+          text: e.message,
+          position: "top-end",
+        });
+      }
+    } else {
       Swal.fire({
-        title : 'Failed',
-        icon : 'error',
-        text : e.message,
-        position: "top-end",
-        
+        title: "Log in Required",
+        icon: "warning",
+        text: "Log in required for handling cart details",
+        confirmButtonText: "Log in ",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/auth");
+        }
       });
     }
-    }else{
-      Swal.fire({
-        title : 'Log in Required',
-        icon : 'warning',
-        text : 'Log in required for handling cart details',
-        confirmButtonText : 'Log in '
-      }).then((result)=>{
-        if(result.isConfirmed){
-          
-          router.push('/auth')
-        }
-      })
-    }
-    
   };
+  useEffect(() => {
+    if (cartQty) {
+      setQty(cartQty);
+    }
+  }, [cartQty]);
 
   const handleBuyNow = () => {
-  
-    if (token!=='') {
+    if (token !== "") {
       setCheckoutProduct(product);
       setEmail(user?.user?.email);
       setCopen(true);
-    }else{
+    } else {
       Swal.fire({
-        title : 'Log in Required',
-        icon : 'warning',
-        text : 'Log in required to provide you the best services...',
-        confirmButtonText : 'Log in '
-      }).then((result)=>{
-        if(result.isConfirmed){
-          
-          router.push('/auth')
+        title: "Log in Required",
+        icon: "warning",
+        text: "Log in required to provide you the best services...",
+        confirmButtonText: "Log in ",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/auth");
         }
-      })
+      });
     }
   };
 
@@ -118,7 +119,7 @@ const ProductDetails = ({ product, setOpen }) => {
       setQty(qty + 1);
     }
   };
-
+  console.log(product.image);
   return (
     <>
       <div className="w-full flex justify-end items-start md:mt-0 mt-16">
@@ -177,25 +178,33 @@ const ProductDetails = ({ product, setOpen }) => {
             </div>
           </div>
           <div className="mt-4 mb-16">
-            <div className="flex items-center text-green-600">
-              <FaRupeeSign className="text-xl" />
-              <span className="text-xl font-bold ml-1">
-                {product.price - (product.price * product.discount) / 100}
-              </span>
+            <div className="flex items-center">
               <span className="line-through text-gray-500 ml-4">
                 {product.price}
               </span>
-              <span className="text-blue-600 font-bold ml-4">
+              <span className="text-green-700 font-bold ml-4">
                 {product.discount}% off
               </span>
+              <div className="flex ml-4 justify-center items-center bg-color-1 px-4 rounded-md">
+                <FaRupeeSign className="mt-[2px]" />
+                <span className="text-xl font-bold ml-1">
+                  {product.price - (product.price * product.discount) / 100}
+                </span>
+              </div>
             </div>
             <Table className="mt-4">
               <TableBody>
-              <TableRow>
+                <TableRow>
                   <TableCell>Total Payable :/-</TableCell>
                   <TableCell
-                  className={`${(product.sellingPrice*qty)>2000 ? "text-green-700 font-semibold" : 'text-red-600'}`}
-                  >{product.sellingPrice*qty}/-</TableCell>
+                    className={`${
+                      product.sellingPrice * qty > 2000
+                        ? "text-green-700 font-semibold"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {parseInt(product.sellingPrice * qty)}/-
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Brand:</TableCell>
@@ -242,13 +251,14 @@ const ProductDetails = ({ product, setOpen }) => {
           product={checkoutProduct}
           email={email}
           qty={qty}
-         
-        maxWidth="lg"
-        fullScreen={isSmallScreen}
-        PaperProps={{ style: { width: isSmallScreen ? "100%" : "80%", height: "100vh" } }}
+          maxWidth="lg"
+          fullScreen={isSmallScreen}
+          PaperProps={{
+            style: { width: isSmallScreen ? "100%" : "80%", height: "100vh" },
+          }}
           uid={user?._id}
           setCopen={setCopen}
-          setOpen = {setOpen}
+          setOpen={setOpen}
         />
       </Dialog>
     </>

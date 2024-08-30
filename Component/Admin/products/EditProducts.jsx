@@ -10,9 +10,10 @@ import {
   Grid,
 } from "@mui/material";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 
-const EditProducts = ({ open, onClose, product, onSave }) => {
+const EditProducts = ({ open, onClose, product, setOpen }) => {
   const [formData, setFormData] = useState({ ...product });
 
   useEffect(() => {
@@ -25,15 +26,21 @@ const EditProducts = ({ open, onClose, product, onSave }) => {
 
   const handleSave = async() => {
       try{
-        const res = await axios.post(`${API_URL}/products/updateProduct`, {formData})
+        const res = await axios.put(`${API_URL}/api/products/updateProduct`, {formData})
         if(res.status ===200){
-          alert("Product updated successfully...");
-          onclose();
-        }else{
-          alert("Something went wrong...")
+          Swal.fire({
+            title: 'Success',
+            icon: 'success',
+            text : 'Product updated successfully'
+          })
+          setOpen(false);
         }
       }catch(err){
-        alert("Bad response");
+        Swal.fire({
+          title : 'Error',
+          icon: 'error',
+          text : err.message
+        });
         console.log(err);
       }
   };
@@ -41,7 +48,7 @@ const EditProducts = ({ open, onClose, product, onSave }) => {
 
   
 
-  const inputFields = Object.keys(formData).map((key) => (
+  const inputFields = Object.keys(formData).filter((key)=>key!=="_id" && key!=="__v").map((key) => (
     <Grid item xs={12} key={key}>
       <TextField
         fullWidth
@@ -49,6 +56,7 @@ const EditProducts = ({ open, onClose, product, onSave }) => {
         name={key}
         value={formData[key]}
         onChange={handleChange}
+        disabled={key==="sellingPrice"}
         margin="normal"
       />
     </Grid>
