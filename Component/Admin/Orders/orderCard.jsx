@@ -1,36 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  Card,
-  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
   Typography,
   Button,
   Dialog,
-  Grid,
-  IconButton,
+  Paper,
 } from "@mui/material";
 import { getProduct } from "@/Redux/actions/productActions";
 import { fetchUserDetails } from "@/Redux/actions/userAuthAction";
 import EditOrder from "./editOrder";
-import { MdModeEditOutline, MdDelete } from "react-icons/md";
 import Swal from "sweetalert2";
 import axios from "axios";
-import { deleteOrderbyId } from "@/Api";
+import { deleteOrderbyId, getDeliveryAddress } from "@/Api";
 import { fetchOrders } from "@/Redux/actions/orderAction";
-
+import Loader from "@/Component/helpers/loader";
 
 const OrderCard = ({ order }) => {
   const [open, setOpen] = useState(false);
+  const [address, setAddress] = useState([]);
+
   const dispatch = useDispatch();
 
-  const userDetails = useSelector((state) => state.auth.user);
+
   const product = useSelector((state) => state.products.products);
 
   // Fetch user details and product information
   useEffect(() => {
-    if (!userDetails) dispatch(fetchUserDetails());
+   
     if (order.productId) dispatch(getProduct(order.productId));
-  }, [dispatch, order.productId, userDetails]);
+    if(order.addressId) getDeliveryAddres(order.addressId);
+  }, [dispatch, order.productId]);
 
   const handleOpen = () => {
     Swal.fire({
@@ -40,7 +46,6 @@ const OrderCard = ({ order }) => {
       confirmButtonText: "Update",
       denyButtonText: `Delete`
     }).then((result) => {
-      /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
         setOpen(true);
       } else if (result.isDenied) {
@@ -56,19 +61,12 @@ const OrderCard = ({ order }) => {
           if(result.isConfirmed){
             handleDelete();
           }else if(result.isDenied){
-            close();
+            setOpen(false);
           }
         });
-      
       }
     });
   };
-
-  
-
-  
-
-  
 
   const handleUpdate = (updatedDetails) => {
     console.log("Updated Details: ", updatedDetails);
@@ -78,13 +76,13 @@ const OrderCard = ({ order }) => {
   const handleDelete = async() => {
     try{
       const res = await axios.delete(`${deleteOrderbyId}/${order._id}`);
-      if(res.status=== 200){
+      if(res.status === 200){
         Swal.fire({
           title: "Deleted",
           icon: "success",
           text : 'Order deleted successfully...'
-        })
-        dispatch(fetchOrders())
+        });
+        dispatch(fetchOrders());
       }
     }catch(err){
       console.log("Error", err);
@@ -97,65 +95,101 @@ const OrderCard = ({ order }) => {
     setOpen(false);
   };
 
+  const getDeliveryAddres = async(id)=>{
+    try{
+      const res = await axios.get(`${getDeliveryAddress}/${id}`)
+      if(res.status === 200){
+        setAddress(res.data[0]);
+      }
+    }catch(err){
+      console.log("Error", err);
+    }
+  }
+  console.log(address);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+  
+    // Extracting day, month, year, hours, and minutes
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = String(date.getFullYear()).slice(2); // Last two digits of the year
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  };
+  
+
   return (
     <>
-    <Card
-      sx={{ maxWidth: 345, m: 2, boxShadow: 3, cursor: "pointer" }}
-      onClick={handleOpen}
-    >
-      <CardContent>
-        <div className="flex justify-between items-center">
-        <Typography variant="h6" component="div" gutterBottom>
-          Order Details
-        </Typography>
-          
-        </div>
-        <Typography variant="body2" color="text.secondary">
-          <strong>User Id:</strong>{" "}
-          {userDetails ? order.userId : "Loading..."}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <strong>User Name:</strong>{" "}
-          {userDetails ? userDetails.user.name : "Loading..."}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <strong>Product Name:</strong> {product ? product.name : "Loading..."}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <strong>Product Category:</strong>{" "}
-          {product ? product.category : "Loading..."}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <strong>Quantity:</strong> {order.quantity}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <strong>Order Amount:</strong> ${order.orderAmount}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <strong>Payment Mode:</strong> {order.paymentMode}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <strong>Payment ID:</strong> {order.paymentId}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <strong>Payment ID:</strong> {(order.date).split('T')[0]}
-        </Typography>
-        <Typography variant="body2">
-          <strong>Status :</strong> {order.status}
-        </Typography>
-      </CardContent>
-      
-    </Card>
-    {open &&
-      <Dialog open={open} onClose={()=>setOpen(false)} fullWidth maxWidth="sm">
-        <EditOrder
-          order={order}
-          productDetails={product}
-          onUpdate={handleUpdate}
-          setOpen={setOpen}
-        />
-      </Dialog>
+    {order.length===0 ? <Loader/> : 
+      <TableContainer component={Paper} sx={{ mb: 2, boxShadow: 3 }} onClick={()=>setOpen(true)}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell colSpan={2} align="center">
+                <Typography variant="h6" className="bg-color-1">Order Details</Typography>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            
+            <TableRow>
+              <TableCell><strong>User Name</strong></TableCell>
+              <TableCell>{address ? address.name : "Loading..."}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>User Address</TableCell>
+              <TableCell>{`${address.landmark}, ${address.locality}, ${address.city}, ${address.state} - ${address.zip} `}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Product Category :</strong></TableCell>
+              <TableCell>{product ? product.categories : "Loading..."}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Brand :</strong></TableCell>
+              <TableCell>{product ? product.brand : "Loading..."}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Quantity :</strong></TableCell>
+              <TableCell>{order.quantity}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Order Amount:</strong></TableCell>
+              <TableCell>{order.orderAmount}/-</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Payment Mode:</strong></TableCell>
+              <TableCell>{order.paymentMode}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Payment ID:</strong></TableCell>
+              <TableCell>{order.paymentId}</TableCell>
+            </TableRow>
+            <TableRow className="w-full justify-between">
+              <TableCell className="w-1/2"><strong>Order Date:</strong></TableCell>
+              <TableCell>{formatDate(order.date)}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Status:</strong></TableCell>
+              <TableCell>{order.status}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
 }
+
+      {open &&
+        <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+          <EditOrder
+            order={order}
+            productDetails={product}
+            onUpdate={handleUpdate}
+            setOpen={setOpen}
+          />
+        </Dialog>
+      }
     </>
   );
 };

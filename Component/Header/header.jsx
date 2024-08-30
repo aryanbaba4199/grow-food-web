@@ -22,8 +22,8 @@ import { getProducts } from "@/Redux/actions/productActions";
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
- 
-  const {user, token } = useContext(UserContext);
+
+  const { user, token } = useContext(UserContext);
   const [menu, setMenu] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
@@ -33,13 +33,12 @@ const Header = () => {
   useEffect(() => {
     if (token) {
       dispatch(fetchUserDetails());
-      dispatch(getProducts())
+      dispatch(getProducts());
     }
     setIsMounted(true);
   }, [dispatch, token]);
 
   const products = useSelector((state) => state.products.products);
-
 
   const handleSignOut = () => {
     try {
@@ -56,24 +55,19 @@ const Header = () => {
     return null;
   }
 
- const userDetails =  user;
-
-  
+  const userDetails = user;
 
   console.log("user header is", userDetails);
 
   return (
     <>
       <div className="bg-[#1e4426] text-white">
-        <div className="flex justify-between items-center px-4">
+        <div className="flex justify-between items-center px-4 text-sm">
           <div className="md:w-[20%] w-[30%] flex justify-start gap-3 items-center">
-            
-            
-              <MdMenu
-                onClick={() => setUserMenu(!userMenu)}
-                className="text-3xl hover:cursor-pointer md:hidden block"
-              />
-            
+            <MdMenu
+              onClick={() => setUserMenu(!userMenu)}
+              className="text-3xl hover:cursor-pointer md:hidden block"
+            />
 
             <Link href="/">
               <Image
@@ -84,30 +78,41 @@ const Header = () => {
             </Link>
           </div>
           <div className="md:w-[30%] w-[80%]">
-            <Search products = {products} />
+            <Search products={products} />
           </div>
           <div className="md:absolute right-1">
-          {userDetails?.user?.email === "aryanbaba4199@gmail.com" && (
+            {userDetails?.user?.email === "aryanbaba4199@gmail.com" && (
               <CiMenuKebab
                 onClick={() => setIsAdmin(!isAdmin)}
                 className="text-3xl hover:cursor-pointer"
               />
             )}
           </div>
-          <div className="md:flex hidden justify-start ml-12 items-center gap-8 w-[50%] ">
-            <Link href="/" className="flex gap-2 ">
+          <div className="md:flex hidden justify-start ml-12 items-center gap-4 w-[50%] ">
+            <Link
+              href="/"
+              className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
+            >
               <span>
                 <FaHome className={`${gf_colors.primary_Icon_Color} mt-1`} />
               </span>
               <span>Home</span>
             </Link>
-            <Link href="/products" className="flex gap-2 ">
+            <Link
+              href="/products"
+              className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
+            >
               <span>
-                <FaDatabase className={`${gf_colors.primary_Icon_Color} mt-1`} />
+                <FaDatabase
+                  className={`${gf_colors.primary_Icon_Color} mt-1`}
+                />
               </span>
               <span>Products</span>
             </Link>
-            <Link href="/cart" className="flex gap-2 ">
+            <Link
+              href="/cart"
+              className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
+            >
               <span>
                 <FaCartPlus
                   className={`${gf_colors.primary_Icon_Color} mt-1`}
@@ -117,7 +122,10 @@ const Header = () => {
             </Link>
             {token ? (
               <>
-                <button onClick={handleSignOut} className="flex gap-2 ">
+                <button
+                  onClick={handleSignOut}
+                  className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
+                >
                   <span>
                     <FaLockOpen
                       className={`${gf_colors.primary_Icon_Color} mt-1`}
@@ -127,7 +135,10 @@ const Header = () => {
                 </button>
               </>
             ) : (
-              <Link href="/auth" className="flex gap-2 ">
+              <Link
+                href="/auth"
+                className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
+              >
                 <span>
                   <FaLock className="mt-1 text-red-500" />
                 </span>
@@ -135,7 +146,10 @@ const Header = () => {
               </Link>
             )}
             {userDetails?.user?.email === "aryanbaba4199@gmail.com" && (
-              <Link href="/admin/analytics" className="flex gap-2 ">
+              <Link
+                href="/admin/analytics"
+                className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
+              >
                 <span className={`${gf_colors.primary_Icon_Color} mt-1`}>
                   <MdAdminPanelSettings />
                 </span>
@@ -145,7 +159,7 @@ const Header = () => {
             <>
               {token && (
                 <button
-                  className="flex gap-2 "
+                  className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
                   onClick={() => setShowProfile(true)}
                 >
                   <span className="mt-1">
@@ -219,19 +233,18 @@ const Header = () => {
                   <span>Log In</span>
                 </Link>
               )}
-              
-                {token && 
-                  <button
-                    className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
-                    onClick={() => setShowProfile(true)}
-                  >
-                    <span className="mt-1 text-yellow-600">
-                      <MdAdminPanelSettings />
-                    </span>
-                    <span>Profile</span>
-                  </button>
-}
-          
+
+              {token && (
+                <button
+                  className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
+                  onClick={() => setShowProfile(true)}
+                >
+                  <span className="mt-1 text-yellow-600">
+                    <MdAdminPanelSettings />
+                  </span>
+                  <span>Profile</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
