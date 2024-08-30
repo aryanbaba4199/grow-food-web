@@ -24,7 +24,7 @@ import { useRouter } from "next/router";
 
 const ProductDetails = ({ product, setOpen, cartQty }) => {
   const [index, setIndex] = useState(0);
-  const [checkoutProduct, setCheckoutProduct] = useState("");
+  const [checkoutProduct, setCheckoutProduct] = useState([]);
   const [cOpen, setCopen] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -82,7 +82,7 @@ const ProductDetails = ({ product, setOpen, cartQty }) => {
 
   const handleBuyNow = () => {
     if (token !== "") {
-      setCheckoutProduct(product);
+      setCheckoutProduct([product])
       setEmail(user?.user?.email);
       setCopen(true);
     } else {
@@ -248,8 +248,7 @@ const ProductDetails = ({ product, setOpen, cartQty }) => {
         PaperProps={{ style: { width: "60%", height: "100vh" } }}
       >
         <Checkout
-          product={checkoutProduct}
-          email={email}
+          products={checkoutProduct}
           qty={qty}
           maxWidth="lg"
           fullScreen={isSmallScreen}

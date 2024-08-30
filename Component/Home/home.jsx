@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "./productCard";
+import { getProducts } from "@/Redux/actions/productActions";
 import Banner from "./banner";
 import Loader from "../helpers/loader";
 import Slide from "./sliderMenu";
-
+import { getBrands } from "@/Redux/actions/productActions";
+import { getCategories } from "@/Redux/actions/productActions";
 import { useRouter } from "next/router";
 
 const Home = () => {
@@ -12,10 +14,14 @@ const Home = () => {
   const [isFilter, setIsFilter] = useState(false);
   
   const router = useRouter();
-  
+  const dispatch = useDispatch();
   const productContainerRef = useRef(null); // Create a ref for the product container
 
- 
+  useEffect(() => {
+    dispatch(getProducts());
+    dispatch(getCategories());
+    dispatch(getBrands());
+  }, [dispatch]);
 
   const products = useSelector((state) => state.products.products);
   const categories = useSelector((state) => state.products.categories);

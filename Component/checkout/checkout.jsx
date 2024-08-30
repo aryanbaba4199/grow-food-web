@@ -1,146 +1,128 @@
 import React, { useEffect, useState, useContext } from "react";
-import { getuserAddress } from "@/Api";
-import { createOrderAPI } from "@/Api";
+import { getuserAddress, createOrderAPI } from "@/Api";
 import UserContext from "@/userContext";
-import { Card, CardContent, Typography, Button, Grid } from "@mui/material";
+import { Card, CardContent, Typography, Button, Grid, Table, TableBody, TableCell, TableRow } from "@mui/material";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import { IoMdCloseCircle } from "react-icons/io";
-import { createOrder } from "@/Redux/actions/orderAction";
 import axios from "axios";
 import { FaCheckDouble } from "react-icons/fa";
-const Checkout = ({ product, email, qty, uid, setCopen, setOpen }) => {
+
+const Checkout = ({ products, quantities, setCopen, setOpen, deleteCart, qty }) => {
   const [address, setAddress] = useState(null);
   const [addressId, setAddressId] = useState("");
+  const [calculatedPrices, setCalculatedPrices] = useState([]);
   const router = useRouter();
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    if (user.user) {
-      getAddress();
-    }
+    if (user.user) getAddress();
   }, [user]);
-  console.log(typeof user);
+
+  useEffect(() => {
+    if (products.length > 0 && quantities?.length > 0 || qty) {
+      const newCalculatedPrices = products.map(item => {
+        const quantity = quantities?.find(cart => cart?.productId === item?._id)?.qty || qty;
+        const totalPrice = quantity * item.sellingPrice;
+        return { productId: item._id, quantity, totalPrice };
+      });
+      setCalculatedPrices(newCalculatedPrices);
+    }
+  }, [products, quantities]);
+
   const getAddress = async () => {
-    console.log(user);
     try {
       const res = await axios.get(`${getuserAddress}/${user.user._id}`);
-      if (res.status === 200) {
-        console.log("Success", res.data);
-        setAddress(res.data);
-      }
+      if (res.status === 200) setAddress(res.data);
     } catch (e) {
       console.error(e);
     }
   };
 
   const handleCheckOut = async () => {
-    if (addressId === "") {
+    if (!addressId) {
       alert("Please select an address");
       return;
     }
-    const productId = product._id;
-    const userId = user.user._id;
-    const quantity = qty;
-    const paymentId = "na";
-    const paymentMode = "COD";
-    const orderAmount = product.sellingPrice || 10 * qty;
-    const order = {
-      productId,
-      userId,
+
+    const orderDetails = calculatedPrices.map(item => ({
+      productId: item.productId,
+      userId: user.user._id,
       addressId,
-      quantity,
-      paymentId,
-      paymentMode,
-      orderAmount,
-    };
+      quantity: item.quantity,
+      paymentId: "na",
+      paymentMode: "COD",
+      orderAmount: item.totalPrice
+    }));
 
     try {
-      const res = await axios.post(createOrderAPI, { order });
+      const res = await axios.post(createOrderAPI, { orders: orderDetails });
       if (res.status === 200) {
-        Swal.fire({
-          title: "Success",
-          icon: "success",
-          text: "Order Created Successfully",
-        });
+        Swal.fire("Success", "Order Created Successfully", "success");
         setOpen(false);
         setCopen(false);
+        router.push("/");
       }
-      router.push("/");
+      if(deleteCart!==undefined){
+        deleteCart();
+      }
     } catch (e) {
-      console.log(e);
-      Swal.fire({
-        title: "Error",
-        icon: "error",
-        text: e.message,
-      });
+      Swal.fire("Error", e.message, "error");
     }
   };
-  console.table(address);
-  useEffect(()=>{
-    if(product.sellingPrice*qty<2000){
+
+  const totalPayable = calculatedPrices.reduce((acc, item) => acc + item.totalPrice, 0);
+
+  useEffect(() => {
+    const totalPayable = products.reduce(
+      (acc, product) => acc + product.sellingPrice * qty, 
+      0
+    );
+  
+    if (totalPayable < 2000) {
       Swal.fire({
-        icon : 'info',
-        title : `Order Amount : ${product.sellingPrice*qty}/-`,
-        text : `Order Amount can not be less than 2000/-`
-      })
+        title: 'Minimum Order: 2000/-',
+        icon: 'info',
+        text: `You have to create an order amount of a minimum of 2000/- currently: ${totalPayable}`
+      });
       setCopen(false);
     }
-    
-  }, []);
+  }, [products, qty]); 
+  
+  
 
   return (
     <>
-      <button className="z-10 float-end self-end md:mt-0 mt-8">
-          <IoMdCloseCircle
-            className="text-3xl text-red-600 hover:cursor-pointer"
-            onClick={()=>setCopen(false)}
-          />
-        </button>
-        
-      
-      <div className="container mx-auto py-2">
-        <Grid container spacing={4}>
+      <button className="absolute top-4 right-4 z-10">
+        <IoMdCloseCircle className="text-3xl text-red-600 cursor-pointer" onClick={() => setCopen(false)} />
+      </button>
+
+      <div className="container mx-auto p-4">
+        <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            
             <Card className="shadow-lg">
               <CardContent>
-                <Typography
-                  variant="h6"
-                  className="bg-color-1 text-white px-4 py-2 rounded-md"
-                >
+                <Typography variant="h6" className="bg-color-1 text-white px-4 py-2 rounded-md">
                   Delivery Address
                 </Typography>
                 <div className="mt-4">
                   {address ? (
-                    <>
-                      {address.map((item, i) => (
-                        <div
-                          className={`shadow-md shadow-green-600 mt-2 font-semibold px-8 flex  flex-col py-1 gap-2 ${
-                            addressId !== "" && addressId === item._id
-                              ? "shadow-green-700 blur-0"
-                              : "blur-[1px]"
-                          }`}
-                          onClick={() => setAddressId(item._id)}
-                        >
-                          <span>Name : {item.name}</span>
-                          <div className="flex justify-between items-center">
-                            <span>{item.mobile}</span>
-                            {addressId !== "" && addressId === item._id && (
-                              <FaCheckDouble className="text-green-600" />
-                            )}
-                          </div>
-
-                          <div className="flex flex-row gap-2 text-sm text-gray-700">
-                            <span>{item.landmark}</span>
-                            <span>{item.locality}</span>
-                            <span>{item.city}</span>
-                            <span>{item.state}</span>
-                            <span>{item.zip}</span>
-                          </div>
+                    address.map((item) => (
+                      <div
+                        key={item._id}
+                        className={`border p-4 mb-2 rounded-md cursor-pointer ${addressId === item._id ? "border-green-600" : "border-gray-300"}`}
+                        onClick={() => setAddressId(item._id)}
+                      >
+                        <span>Name: {item.name}</span>
+                        <div className="flex justify-between items-center">
+                          <span>{item.mobile}</span>
+                          {addressId === item._id && <FaCheckDouble className="text-green-600" />}
                         </div>
-                      ))}
-                    </>
+                        <div className="text-sm text-gray-700">
+                          {item.landmark}, {item.locality}, {item.city}, {item.state} - {item.zip}
+                        </div>
+                      </div>
+                    ))
                   ) : (
                     <Typography>Loading address...</Typography>
                   )}
@@ -152,38 +134,42 @@ const Checkout = ({ product, email, qty, uid, setCopen, setOpen }) => {
           <Grid item xs={12} md={6}>
             <Card className="shadow-lg">
               <CardContent>
-                <Typography
-                  variant="h6"
-                  className="bg-color-1 text-white px-4 py-2 rounded-md"
-                >
+                <Typography variant="h6" className="bg-color-1 text-white px-4 py-2 rounded-md">
                   Product Details
                 </Typography>
-                <div className="px-8 mt-4">
-                  <div className="grid grid-cols-1 gap-2">
-                    <Typography>Total Product: 1</Typography>
-                    <Typography>Quantity: {qty}</Typography>
-                    <Typography>Delivery Charges: Free</Typography>
-                    <Typography>
-                      Total Amount: {product.price * qty}/-
-                    </Typography>
-                    <Typography>
-                      Discounted Amount:{" "}
-                      {((product.price * product.discount) / 100)*qty}/-
-                    </Typography>
-                    <Typography>
-                      Total Payable: {product.sellingPrice*qty}/-
-                    </Typography>
-                  </div>
-                  
+                <Table className="mt-4">
+                  <TableBody>
+                    <TableRow>
+                      <TableCell><strong>Product Name</strong></TableCell>
+                      <TableCell><strong>Quantity</strong></TableCell>
+                      <TableCell><strong>Rate</strong></TableCell>
+                      <TableCell><strong>Total</strong></TableCell>
+                    </TableRow>
+                    {calculatedPrices.map((item) => {
+                      const product = products.find(prod => prod._id === item.productId);
+                      return (
+                        <TableRow key={item.productId}>
+                          <TableCell>{product.name}</TableCell>
+                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>{product.sellingPrice}</TableCell>
+                          <TableCell>{item.totalPrice}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+                <div className="mt-4 text-right">
+                  <Typography variant="h6">Total Payable: {totalPayable}/-</Typography>
                 </div>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
-        <div className="flex justify-center items-center">
+
+        <div className="flex justify-center mt-8">
           <button
             onClick={handleCheckOut}
-            className="mt-8 bg-color-1 text-white px-4 py-2 rounded-md font-semibold"
+            className="bg-color-1 text-white px-4 py-2 rounded-md font-semibold"
           >
             Checkout
           </button>
