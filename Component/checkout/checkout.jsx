@@ -93,18 +93,20 @@ const Checkout = ({ products, quantities, setCopen, setOpen, deleteCart, qty }) 
 
   return (
     <>
-      <button className="absolute top-4 right-4 z-10">
-        <IoMdCloseCircle className="text-3xl text-red-600 cursor-pointer" onClick={() => setCopen(false)} />
-      </button>
+      
 
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 mt-4">
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <Card className="shadow-lg">
               <CardContent>
-                <Typography variant="h6" className="bg-color-1 text-white px-4 py-2 rounded-md">
+                <Typography variant="h6" className="bg-color-1 flex justify-between text-white px-4 py-2 rounded-md">
+                  <span>
                   Delivery Address
+                  </span>
+                  <span className="text-xl bg-white px-2 rounded-full text-red-400" onClick={()=>setCopen(false)}>X</span>
                 </Typography>
+                
                 <div className="mt-4">
                   {address ? (
                     address.map((item) => (

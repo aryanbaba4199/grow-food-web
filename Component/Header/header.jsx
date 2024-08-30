@@ -68,12 +68,12 @@ const Header = () => {
         <div className="flex justify-between items-center px-4">
           <div className="md:w-[20%] w-[30%] flex justify-start gap-3 items-center">
             
-            {userDetails?.user?.email  && (
+            
               <MdMenu
                 onClick={() => setUserMenu(!userMenu)}
                 className="text-3xl hover:cursor-pointer md:hidden block"
               />
-            )}
+            
 
             <Link href="/">
               <Image

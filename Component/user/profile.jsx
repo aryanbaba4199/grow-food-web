@@ -306,10 +306,10 @@ const Profile = () => {
                 }
                 width={150}
                 height={150}
-                className="rounded-full mx-8 border-2 border-green-600 shadow-md shadow-green-600 mt-1"
+                className="rounded-full mx-8 border-2 border-[#1e4426] shadow-md shadow-[#1e4426] mt-1"
               />
               <FaEdit
-                className="text-green-600 hover:cursor-pointer text-xl"
+                className="text-[#1e4426] hover:cursor-pointer text-xl"
                 onClick={() => {
                   setEditProfile(true);
                   setProfileForm({
@@ -323,33 +323,33 @@ const Profile = () => {
               />
             </div>
             <div className="flex flex-col justify-center items-center mt-4 gap-2 ">
-              <span className="font-semibold text-xl px-4 py-1 bg-green-600 rounded-lg text-white">
+              <span className="font-semibold text-xl px-4 py-1 bg-color-1 rounded-lg text-white">
                 {user.user.name}
               </span>
-              <span className="text-sm bg-blue-100 px-2 py-1">
+              <span className="text-sm border-[1px] border-[#1e4426] rounded-sm px-2 py-1">
                 {user.user.email}
               </span>
             </div>
             <div>
-              <div className="flex justify-between items-center mt-4 px-4 bg-green-600">
+              <div className="flex justify-between items-center mt-4 px-4 bg-color-1">
                 <Link href="/Orders" className="font font-semibold text-white">
                   Orders : {user?.orderLength ?? 0}{" "}
                 </Link>
                 <FaEye
                   className=" react-icons text-lg"
-                  onClick={() => setAddressMode(!addressmode)}
+                  
                 />
               </div>
-              <div className="flex justify-between items-center mt-4 px-4 bg-green-600">
+              <div className="flex justify-between items-center mt-2 px-4 bg-color-1">
                 <Link href="/cart" className="font font-semibold text-white">
                   Cart : {user.cartLength}
                 </Link>
                 <FaEye
                   className=" react-icons text-lg"
-                  onClick={() => setAddressMode(!addressmode)}
+                  
                 />
               </div>
-              <div className="flex justify-between items-center mt-4 px-4 bg-green-600">
+              <div className="flex justify-between items-center mt-2 px-4 bg-color-1">
                 <span className="font font-semibold text-white">
                   Address : {address.length}{" "}
                 </span>
@@ -361,7 +361,7 @@ const Profile = () => {
             </div>
             <div>
               {address.map((item, index) => (
-                <div className="flex flex-col bg-gray-100 text-sm shadow-md shadow-green-600 mt-2 px-4">
+                <div className="flex flex-col bg-gray-100 text-sm shadow-md shadow-[#1e4426] mt-2 px-4">
                   <span>Name : {item.name}</span>
                   <span>Mobile : {item.mobile}</span>
                   <div className="flex flex-wrap gap-2 flex-row mt-1 text-sm text-gray-700">

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { Autocomplete, TextField, InputAdornment, Dialog } from '@mui/material';
-import ProductCard from '../Home/productCard';
+
 import ProductDetails from '../Home/productDetails';
 
-const Search = ({ products }) => {
+const Search = ({ products = [] }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [open, setOpen] = useState(false);
@@ -13,17 +13,17 @@ const Search = ({ products }) => {
   const handleSearchChange = (event, value) => {
     setSearchTerm(value);
 
-    const selectedProduct = products.find((item) => item.name.toLowerCase() === value.toLowerCase());
-    if (selectedProduct) {
-      setSelectedProduct(selectedProduct);
+    const foundProduct = Array.isArray(products) ? products.find((item) => item.name.toLowerCase() === value.toLowerCase()) : null;
+    if (foundProduct) {
+      setSelectedProduct(foundProduct);
       setOpen(true);
     }
   };
 
   // Filtered products based on search term
-  const filteredProducts = products.filter((product) =>
+  const filteredProducts = Array.isArray(products) ? products.filter((product) =>
     product.name.toLowerCase().startsWith(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   return (
     <>
@@ -44,7 +44,6 @@ const Search = ({ products }) => {
                   <FaSearch style={{ color: '#1e4426', marginLeft: 8 }} />
                 </InputAdornment>
               ),
-              
               style: {
                 backgroundColor: '#f3f4f6',
                 color: 'black',

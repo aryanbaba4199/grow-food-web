@@ -192,7 +192,7 @@ const CreateBrand = () => {
   return (
     <div>
       <div className="px-8">
-        <Typography variant="h4" className="mb-4 flex justify-center items-center ">
+        <Typography variant="h4" className="mb-4 mt-4 flex justify-center items-center ">
           <p className="flex bg-color-1 rounded-sm">
           <span className="rounded-s-md bg-color-1 h-10 px-4">Brands</span>
           <FaPlus onClick={()=>setOpen(true)} className="mx-2 my-1 hover:cursor-pointer bg-white text-green-700 rounded-full"/>

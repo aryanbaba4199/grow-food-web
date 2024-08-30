@@ -103,7 +103,7 @@ const ProductDetails = ({ product, setOpen, cartQty }) => {
     if (qty <= product.minimumOrderQty) {
       console.log("This is Minimum");
     } else {
-      setQty(qty - 1);
+      setQty(qty - (product.incDecBy!==undefined ? product.incDecBy : 1));
     }
   };
 
@@ -116,17 +116,17 @@ const ProductDetails = ({ product, setOpen, cartQty }) => {
     if (qty > product.availableQty) {
       console.log("This is maximum quantity");
     } else {
-      setQty(qty + 1);
+      setQty(qty + (product.incDecBy!==undefined ? product.incDecBy : 1));
     }
   };
-  console.log(product.image);
+  console.log(product);
   return (
     <>
       <div className="w-full flex justify-end items-start md:mt-0 mt-16">
-        <IoMdCloseCircle
-          className="text-3xl absolute text-red-600 cursor-pointer"
-          onClick={() => setOpen(false)}
-        />
+        <span
+          className="text-2xl px-2 absolute text-red-400 bg-color-1 rounded-full mr-4 cursor-pointer"
+          onClick={() => setOpen(false)}>X</span>
+        
       </div>
       <div className="flex flex-col md:flex-row justify-between mt-8 px-4 gap-8 md:mb-0 mb-8">
         <div className="flex flex-col justify-center w-full md:w-[45%] items-center">
@@ -245,7 +245,7 @@ const ProductDetails = ({ product, setOpen, cartQty }) => {
         fullWidth
         maxWidth="lg"
         onClose={() => setCopen(false)}
-        PaperProps={{ style: { width: "60%", height: "100vh" } }}
+        fullScreen
       >
         <Checkout
           products={checkoutProduct}
