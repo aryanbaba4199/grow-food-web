@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { getOrdersByUser, getProductbyId, updateOrderbyId, deleteOrderbyId } from "@/Api";
+import {
+  getOrdersByUser,
+  getProductbyId,
+  updateOrderbyId,
+  deleteOrderbyId,
+} from "@/Api";
 import axios from "axios";
 import UserContext from "@/userContext";
 import Loader from "@/Component/helpers/loader";
 import Swal from "sweetalert2";
+import { MdDelete, MdDownload } from "react-icons/md";
 
 const Orders = () => {
   const { user } = useContext(UserContext);
@@ -11,7 +17,7 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [orderIds, setOrdersIds] = useState([]);
   const [loader, setLoader] = useState(false);
-  
+
   const ref = useRef(false);
 
   useEffect(() => {
@@ -87,14 +93,14 @@ const Orders = () => {
 
   const handleDelete = (id) => {
     Swal.fire({
-      title: 'Warning',
-      icon: 'warning',
-      text: 'Are you sure want to cancel this order',
+      title: "Warning",
+      icon: "warning",
+      text: "Are you sure want to cancel this order",
       showDenyButton: true,
-      denyButtonText: 'Close',
-      confirmButtonColor: 'red',
-      denyButtonColor: 'black',
-      confirmButtonText: 'Cancel Order',
+      denyButtonText: "Close",
+      confirmButtonColor: "red",
+      denyButtonColor: "black",
+      confirmButtonText: "Cancel Order",
     }).then((result) => {
       if (result.isConfirmed) {
         const deleteOrder = async () => {
@@ -103,17 +109,17 @@ const Orders = () => {
             const res = await axios.delete(`${deleteOrderbyId}/${id}`);
             if (res.status === 200) {
               Swal.fire({
-                title: 'Cancelled',
-                icon: 'success',
-                text: 'Order Cancelled successfully...',
+                title: "Cancelled",
+                icon: "success",
+                text: "Order Cancelled successfully...",
               });
               getOrders(user.user._id);
             }
           } catch (error) {
             console.error(error);
             Swal.fire({
-              title: 'Failure',
-              icon: 'error',
+              title: "Failure",
+              icon: "error",
               text: error.message,
             });
           } finally {
@@ -127,7 +133,9 @@ const Orders = () => {
 
   return (
     <>
-      {loader ? <Loader /> :
+      {loader ? (
+        <Loader />
+      ) : (
         <>
           <div className="">
             <div className="flex justify-center items-center mt-2">
@@ -231,24 +239,32 @@ const Orders = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex-1 flex-flex-row justify-center items-center">
-                  <div>
-                    <span className="bg-color-1 px-2 text-green-700 font-semibold rounded-sm w-full">
-                      Order Details
-                    </span>
+                <div className="flex-1 flex justify-between items-center">
+                  <div className="">
+                    <div>
+                      <span className="bg-color-1 px-2 text-green-700 font-semibold rounded-sm w-full">
+                        Order Details
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span>Quantity : {item.quantity}</span>
+                      <span>Order Date : {item.date.split("T")[0]}</span>
+                      <span>Amount : {item.orderAmount}/-</span>
+                      <span>Status : {item.status ?? "Not Processed"}</span>
+                    </div>
+                    
                   </div>
-                  <div className="flex flex-col">
-                    <span>Quantity : {item.quantity}</span>
-                    <span>Order Date : {item.date.split("T")[0]}</span>
-                    <span>Amount : {item.orderAmount}/-</span>
-                    <span>Status : {item.status ?? "Not Processed"}</span>
+                  <div className="pr-4 flex flex-col items-center h-full justify-between py-2">
+                      <MdDownload className="bg-color-1 h-8 w-8 rounded-full p-1 hover:cursor-pointer" />
+                      <MdDelete className="text-red-600 bg-red-300 h-8 w-8 rounded-full p-1 hover:cursor-pointer"/>
                   </div>
                 </div>
+                
               </div>
             ))}
           </div>
         </>
-      }
+      )}
     </>
   );
 };

@@ -2,13 +2,15 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import { useRouter } from "next/router";
 import Authform from "../Component/user/authform";
 import { userlogin } from "@/Api";
-import { logout } from "@/Redux/actions/userAuthAction";
+import { fetchUserDetails, logout } from "@/Redux/actions/userAuthAction";
 import Swal from "sweetalert2";
 import { usersAPi } from "@/Api";
 import axios from "axios";
 import UserContext from "@/userContext";
 import { logo_uri } from "@/Api";
 import Loader from "@/Component/helpers/loader";
+import { data } from "autoprefixer";
+import { useDispatch } from "react-redux";
 
 const AuthComponent = () => {
   const [authType, setAuthType] = useState("SignIn");
@@ -19,8 +21,12 @@ const AuthComponent = () => {
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [loader, setLoader] = useState(false);
+  const [userType, setUserType] = useState("NA");
+  const [gst, setGst] = useState("");
+  const [shopAddress, setShopAddress] = useState("");
 
   const router = useRouter();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (token !=='') {
@@ -35,12 +41,13 @@ const AuthComponent = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+   
     setLoader(true);
     const userData = {
       email,
       password,
       ...(authType === "SignUp" && {
+        userType, gst, shopAddress,
         name,
         mobile,
         shopName,
@@ -70,6 +77,9 @@ const AuthComponent = () => {
           icon: "success",
           text: "Log in Successfully",
         });
+        dispatch(fetchUserDetails());
+        router.push("/");
+        
       } catch (error) {
         console.error("Login error:", error);
         Swal.fire({
@@ -81,13 +91,22 @@ const AuthComponent = () => {
       }
     } else {
       try {
+        console.log(data)
         const res = await axios.post(`${usersAPi}/register`, userData);
         if (res.status === 200) {
+          setAuthType("SignIn")
           Swal.fire({
             title: "Success",
             icon: "success",
             text: "Thanks for joining Grow Food",
+            confirmButtonText : "OK", 
+          }).then(async(result)=>{
+            if(result.isConfirmed && authType==='SignIn'){
+              await handleSubmit();
+            }
           });
+          
+
           setLoader(false);
         }
       } catch (error) {
@@ -112,9 +131,9 @@ const AuthComponent = () => {
             <img
               src={logo_uri}
               alt="Grow Food"
-              className=" w-32 border-pink-400 shadow-black shadow-lg border-2 rounded-full p-4"
+              className=" w-32 border-green-700 shadow-black shadow-lg border-2 rounded-full p-4"
             />
-            <h2 className="text-2xl font-semibold text-white bg-pink-600 text-center mt-4 my-2 px-4 py-1 rounded-md">
+            <h2 className="text-2xl font-semibold text-white bg-color-1 text-center mt-4 my-2 px-4 py-1 rounded-md">
               {authType == "SignIn" ? "Sign In" : "Create Account"}
             </h2>
           </div>
@@ -133,6 +152,12 @@ const AuthComponent = () => {
             handleSubmit={handleSubmit}
             shopName={shopName}
             setShopName={setShopName}
+            gst={gst}
+            setGst={setGst}
+            shopAddress={shopAddress}
+            setShopAddress={setShopAddress}
+            setUserType={setUserType}
+      
           />
           {user?.user && (
             <div className="mt-8 text-white">

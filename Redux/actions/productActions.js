@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { productsAPi } from '@/Api';
+import { getSubCategoriesApi, getSubCategoriesAPI, productsAPi } from '@/Api';
 export const GET_PRODUCTS = 'GET_PRODUCTS';
 export const ADD_PRODUCT = 'ADD_PRODUCT';
 export const GET_PRODUCT = 'GET_PRODUCT';
@@ -8,6 +8,7 @@ export const GET_CATEGORY = 'GET_CATEGORY';
 export const UPDATE_PRODUCT = 'UPDATE_PRODUCT';
 export const DELETE_PRODUCT = 'DELETE_PRODUCT';
 export const GET_UNIT = 'GET_UNIT';
+export const GET_SUBCATEGORY = 'GET_SUBCATEGORY';
 
 
 // Use the correct URL for React Native emulator
@@ -63,6 +64,15 @@ export const getUnit = ()=>async dispatch =>{
   }catch(err){
     console.error('Error fetching unit', err);
   };
+}
+
+export const getSubCategories = ()=>async dispatch =>{
+  try{
+    const res = await axios.get(getSubCategoriesApi);
+    dispatch({type : GET_SUBCATEGORY, payload: res.data})
+  }catch(err){
+    console.error('Error fetching', err);
+  }
 }
 
 

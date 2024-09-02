@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import Search from "./search";
-import { FaHome, FaLockOpen, FaLock, FaCartPlus } from "react-icons/fa";
+import { FaHome, FaLockOpen, FaLock, FaCartPlus, FaRegBell } from "react-icons/fa";
 import Link from "next/link";
 import Logo from "@/public/assets/logo.png";
 import { useRouter } from "next/router";
@@ -19,38 +19,29 @@ import { FaDatabase } from "react-icons/fa";
 
 import { getProducts } from "@/Redux/actions/productActions";
 
-const Header = () => {
+const Header = ({setCollapse, collapse}) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
   const { user, token } = useContext(UserContext);
-  const [menu, setMenu] = useState(false);
+
   const [showProfile, setShowProfile] = useState(false);
-  const [userMenu, setUserMenu] = useState(false);
+  const [bell, setBell] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+
 
   useEffect(() => {
+    dispatch(getProducts());
     if (token) {
       dispatch(fetchUserDetails());
-      dispatch(getProducts());
+      
     }
     setIsMounted(true);
   }, [dispatch, token]);
 
   const products = useSelector((state) => state.products.products);
 
-  const handleSignOut = () => {
-    try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("userAddress");
-      router.reload();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
+  
   if (!isMounted) {
     return null;
   }
@@ -63,252 +54,45 @@ const Header = () => {
     <>
       <div className="bg-[#1e4426] text-white">
         <div className="flex justify-between items-center px-4 text-sm">
-          <div className="md:w-[20%] w-[30%] flex justify-start gap-3 items-center">
-            <MdMenu
-              onClick={() => setUserMenu(!userMenu)}
-              className="text-3xl hover:cursor-pointer md:hidden block"
-            />
-
-            <Link href="/">
-              <Image
-                src={Logo}
-                className=" w-12 h-12 rounded-full p-1"
-                alt="Logo"
-              />
-            </Link>
-          </div>
-          <div className="md:w-[30%] w-[80%]">
-            <Search products={products} />
-          </div>
-          <div className="md:absolute right-1">
-            {userDetails?.user?.email === "aryanbaba4199@gmail.com" && (
-              <CiMenuKebab
-                onClick={() => setIsAdmin(!isAdmin)}
+          <div className="flex justify-start items-center w-full">
+            <div className=" flex justify-start gap-3 items-center">
+              <MdMenu
+                onClick={() => setCollapse(!collapse)}
                 className="text-3xl hover:cursor-pointer"
               />
-            )}
+
+              <Link href="/">
+                <Image
+                  src={Logo}
+                  className=" w-12 h-12 rounded-full p-1"
+                  alt="Logo"
+                />
+              </Link>
+            </div>
+            <div className="md:w-[30%] w-[80%] md:ml-16 ml-2">
+              <Search products={products} />
+            </div>
           </div>
-          <div className="md:flex hidden justify-start ml-12 items-center gap-4 w-[50%] ">
-            <Link
-              href="/"
-              className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
-            >
-              <span>
-                <FaHome className={`${gf_colors.primary_Icon_Color} mt-1`} />
-              </span>
-              <span>Home</span>
-            </Link>
-            <Link
-              href="/products"
-              className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
-            >
-              <span>
-                <FaDatabase
-                  className={`${gf_colors.primary_Icon_Color} mt-1`}
-                />
-              </span>
-              <span>Products</span>
-            </Link>
-            <Link
-              href="/cart"
-              className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
-            >
-              <span>
-                <FaCartPlus
-                  className={`${gf_colors.primary_Icon_Color} mt-1`}
-                />
-              </span>
-              <span>Cart</span>
-            </Link>
-            {token ? (
-              <>
-                <button
-                  onClick={handleSignOut}
-                  className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
-                >
-                  <span>
-                    <FaLockOpen
-                      className={`${gf_colors.primary_Icon_Color} mt-1`}
-                    />
-                  </span>
-                  <span>Log out</span>
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/auth"
-                className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
-              >
-                <span>
-                  <FaLock className="mt-1 text-red-500" />
-                </span>
-                <span>Log In</span>
-              </Link>
-            )}
-            {userDetails?.user?.email === "aryanbaba4199@gmail.com" && (
-              <Link
-                href="/admin/analytics"
-                className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
-              >
-                <span className={`${gf_colors.primary_Icon_Color} mt-1`}>
-                  <MdAdminPanelSettings />
-                </span>
-                <span>Admin</span>
-              </Link>
-            )}
-            <>
+          
+          <div className="flex gap-4">
+            <span className="flex bg-color-1 h-8 w-8 rounded-md">
+              
+            <FaRegBell className="w-5 h-5 mt-2"/>
+            {/* <span className="rounded-full -translate-y-2 -translate-x-1 text-lg font-semibold">{user?.cartLength}</span> */}
+            </span>
               {token && (
-                <button
-                  className="flex gap-2 bg-gray-100 border-[#1e4426] text-[#1e4426] px-2 rounded-md py-1 focus:bg-color-1"
+                <img
+                  src={userDetails?.user?.image}
+                  className="w-8 h-8 hover:cursor-pointer rounded-full mr-4"
                   onClick={() => setShowProfile(true)}
-                >
-                  <span className="mt-1">
-                    <MdAdminPanelSettings />
-                  </span>
-                  <span>Profile</span>
-                </button>
+                />
               )}
-            </>
           </div>
         </div>
       </div>
 
-      <Drawer open={userMenu} onClose={() => setUserMenu(false)}>
-        <div className="bg-[#1e4426] text-white h-full flex flex-col ">
-          <div className="flex flex-col justify-center items-center mt-8 font-semibold">
-            <SiIfood className="text-7xl" />
-            <span className="text-lg">
-              Grow <span className="text-green-400">Food</span>
-            </span>
-            <div className="flex flex-col gap-5 w-full mt-10">
-              <Link
-                href="/"
-                onClick={() => setUserMenu(false)}
-                className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%]"
-              >
-                <span>
-                  <FaHome className="mt-1 text-yellow-500" />
-                </span>
-                <span>Home</span>
-              </Link>
-              <Link
-                href="/products"
-                onClick={() => setUserMenu(false)}
-                className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%]"
-              >
-                <span>
-                  <FaCartPlus className="mt-1 text-yellow-500" />
-                </span>
-                <span>Products</span>
-              </Link>
-              <Link
-                href="/cart"
-                onClick={() => setUserMenu(false)}
-                className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%]"
-              >
-                <span>
-                  <FaCartPlus className="mt-1 text-yellow-500" />
-                </span>
-                <span>Cart</span>
-              </Link>
-              {token ? (
-                <button
-                  onClick={handleSignOut}
-                  className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
-                >
-                  <span onClick={() => setUserMenu(false)}>
-                    <FaLockOpen className="mt-1 text-yellow-500" />
-                  </span>
-                  <span>Log out</span>
-                </button>
-              ) : (
-                <Link
-                  href="/auth"
-                  onClick={() => setUserMenu(false)}
-                  className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
-                >
-                  <span>
-                    <FaLock className="mt-1 text-red-500" />
-                  </span>
-                  <span>Log In</span>
-                </Link>
-              )}
-
-              {token && (
-                <button
-                  className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
-                  onClick={() => setShowProfile(true)}
-                >
-                  <span className="mt-1 text-yellow-600">
-                    <MdAdminPanelSettings />
-                  </span>
-                  <span>Profile</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </Drawer>
-
-      <Drawer anchor="right" open={isAdmin} onClose={() => setIsAdmin(false)}>
-        <div className="bg-[#1e4426] text-white h-full flex flex-col">
-          <div className="flex flex-col justify-center items-center mt-8 font-semibold">
-            <SiIfood className="text-7xl" />
-            <span className="text-lg">
-              Grow <span className="text-green-400">Food</span>
-            </span>
-          </div>
-          <div
-            onClick={() => setMenu(false)}
-            className="flex focus:bg-green-600 px-12 hover:cursor-pointer hover:bg-gray-800 py-1 justify-start items-center mt-12"
-          >
-            <Link href={`/admin/analytics`} className="">
-              Dashboard
-            </Link>
-          </div>
-          <div
-            onClick={() => setMenu(false)}
-            className="flex focus:bg-green-600 px-12 hover:cursor-pointer hover:bg-gray-800 py-1 justify-start items-center mt-4"
-          >
-            <Link href={`/admin/orders`} className="">
-              Orders
-            </Link>
-          </div>
-          <div
-            onClick={() => setMenu(false)}
-            className="flex focus:bg-green-600 px-12 hover:cursor-pointer hover:bg-gray-800 py-1 justify-start items-center mt-4"
-          >
-            <Link href={`/admin/products`} className="">
-              Products
-            </Link>
-          </div>
-          <div
-            onClick={() => setMenu(false)}
-            className="flex focus:bg-green-600 px-12 hover:cursor-pointer hover:bg-gray-800 py-1 justify-start items-center mt-4"
-          >
-            <Link href={`/admin/brands`} className="">
-              Brands
-            </Link>
-          </div>
-          <div
-            onClick={() => setMenu(false)}
-            className="flex focus:bg-green-600 px-12 hover:cursor-pointer hover:bg-gray-800 py-1 justify-start items-center mt-4"
-          >
-            <Link href={`/admin/category`} className="">
-              Category
-            </Link>
-          </div>
-          <div
-            onClick={() => setMenu(false)}
-            className="flex focus:bg-green-600 px-12 hover:cursor-pointer hover:bg-gray-800 py-1 justify-start items-center mt-4"
-          >
-            <Link href={`/admin/analytics`} className="">
-              Analytics
-            </Link>
-          </div>
-        </div>
-      </Drawer>
-
+      
+      
       <Drawer
         anchor="right"
         open={showProfile}

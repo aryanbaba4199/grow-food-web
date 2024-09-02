@@ -1,14 +1,34 @@
 import React, { useState } from "react";
 import { FaRupeeSign } from "react-icons/fa";
 import { Button, Dialog, useMediaQuery, useTheme } from "@mui/material";
-import ProductDetails from "./productDetails";
-import { MdDelete } from "react-icons/md";
+import CryptoJS from "crypto-js";
+import Carousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
+
+import { useRouter } from "next/router";
 
 const ProductCard = ({ item, isCart, deleteCartItem, qty }) => {
-  const [open, setOpen] = useState(false);
+  const router = useRouter();
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const responsive = {
+    superLargeDesktop: {
+      // the naming can be any, depends on you.
+      breakpoint: { max: 4000, min: 3000 },
+      items: 1,
+    },
+    desktop: {
+      breakpoint: { max: 3000, min: 1024 },
+      items: 1,
+    },
+    tablet: {
+      breakpoint: { max: 1024, min: 464 },
+      items: 1,
+    },
+    mobile: {
+      breakpoint: { max: 464, min: 0 },
+      items: 1,
+    },
+  };
 
   return (
     <>
@@ -19,14 +39,43 @@ const ProductCard = ({ item, isCart, deleteCartItem, qty }) => {
       ) : (
         <div className="md:w-60  px-2 flex-1 border bg-gray-100 rounded-md flex flex-col pt-2 justify-center items-center cursor-pointer shadow-sm shadow-black hover:shadow-black hover:shadow-md">
           <div
-            onClick={() => setOpen(true)}
-            className="w-full flex-1 justify-center items-center flex flex-col"
+            onClick={() => {
+              const encryptedProduct = CryptoJS.AES.encrypt(
+                JSON.stringify(item),
+                "2468"
+              ).toString();
+              router.push(
+                `/ProductDetails?thegrowfood=${encodeURIComponent(
+                  encryptedProduct
+                )}`
+              );
+            }}
+            className="w-full flex-1 justify-center items-center flex flex-col hover:scale-105 hover:ease-in-out hover:transition-all"
           >
-            <img
-              src={item.image[0]}
-              className="w-28 h-24 rounded-md"
-              alt={item.name}
-            />
+            <Carousel
+              className="w-full h-auto"
+              responsive={responsive}
+              ssr={true} // means to render carousel on server-side.
+              infinite={true}
+              autoPlay={true}
+              autoPlaySpeed={3000}
+              keyBoardControl={true}
+              arrows={false}
+              transitionDuration={700}
+              dotListClass="custom-dot-list-style"
+            >
+              {item.image.map((uri, index) => (
+                <div className="flex justify-center">
+                  <img
+                    key={index}
+                    src={uri}
+                    className="w-28 h-24 rounded-md"
+                    alt={item.name}
+                  />
+                </div>
+              ))}
+            </Carousel>
+
             <div>
               <p>{item.name}</p>
               <p className="font-bold">{item.categories}</p>
@@ -70,18 +119,6 @@ const ProductCard = ({ item, isCart, deleteCartItem, qty }) => {
           </div>
         </div>
       )}
-      <Dialog
-        fullWidth
-        maxWidth="lg"
-        fullScreen={isSmallScreen} // Enable full screen mode on small screens
-        PaperProps={{
-          style: { width: isSmallScreen ? "100%" : "80%", height: "100vh" },
-        }}
-        open={open}
-        onClose={() => setOpen(false)}
-      >
-        <ProductDetails setOpen={setOpen} product={item} cartQty={qty} />
-      </Dialog>
     </>
   );
 };

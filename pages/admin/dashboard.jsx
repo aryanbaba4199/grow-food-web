@@ -11,7 +11,7 @@ import { BiSolidCategoryAlt } from "react-icons/bi";
 
 import { useSelector } from "react-redux";
 
-const Admin = () => {
+const Dashboard = () => {
   const [index, setIndex] = useState("");
 
   const { user } = useSelector((state) => state.auth);
@@ -69,4 +69,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default Dashboard;

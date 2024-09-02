@@ -1,23 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct, createUnit } from "@/Api";
+import {
+  createProduct,
+  createSubCategory,
+  createUnit,
+  getSubCategoriesApi,
+} from "@/Api";
 import axios from "axios";
-
+import { FaPercent } from "react-icons/fa";
+import { MdOutlineCurrencyRupee } from "react-icons/md";
 import {
   getBrands,
   getCategories,
+  getSubCategories,
   getUnit,
 } from "@/Redux/actions/productActions"; // Adjust the import path as needed
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import { Autocomplete, Box, Typography, Grid } from "@mui/material";
+import { Autocomplete, Box, Typography, Grid, IconButton } from "@mui/material";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import { unitMeasureData } from "@/Context/projectData";
 import deleteImageFromCloudinary, {
   uploadImageToCloudinary,
 } from "@/Context/functions";
+import { MdCameraFront } from "react-icons/md";
+
+
+
 
 const CreateProduct = ({ setIndex, setCreateMode }) => {
   const defaultFormData = {
@@ -26,8 +37,9 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
     brand: "",
     categories: "",
     subCategory: "",
-    image: "",
+    image: [],
     discount: 0,
+    discountType: "",
     price: 0,
     sellingPrice: 0,
     unit: "",
@@ -43,9 +55,11 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
   const brands = useSelector((state) => state.products.brands);
   const categories = useSelector((state) => state.products.categories);
   const unitsData = useSelector((state) => state.products.units);
+  const subCategoryData = useSelector((state) => state.products.subCategories);
   const [image, setImage] = useState("");
   const [units, setUnits] = useState(["Create Unit"]);
-  const [imageId, setImageId] = useState("");
+  const [subCategory, setSubCategory] = useState(["Create Sub Category"]);
+  const [imageId, setImageId] = useState([]);
   const [tempImageUrl, setTempImageURL] = useState("");
   const [productData, setProductData] = useState(defaultFormData);
   const [errorField, setErrorField] = useState([]);
@@ -57,6 +71,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
     dispatch(getBrands());
     dispatch(getCategories());
     dispatch(getUnit());
+    dispatch(getSubCategories());
   }, [dispatch]);
 
   useEffect(() => {
@@ -70,8 +85,17 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
   useEffect(() => {
     const unitNames = unitsData.map((unit) => unit.name);
     setUnits([...unitNames, "Create Unit"]);
-    console.log(units);
+   
   }, [unitsData]);
+
+console.log(productData)
+  useEffect(() => {
+    if (subCategoryData !== undefined) {
+      const subCategoryName = subCategoryData?.map((item) => item.name);
+      console.log(subCategoryName);
+      setSubCategory([...subCategoryName, "Create Sub Category"]);
+    }
+  }, [subCategoryData]);
 
   const handleChange = (e) => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
@@ -92,26 +116,10 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
           text: "Product Created successfully",
           icon: "success",
         });
-        setProductData({
-          name: "",
-          description: "",
-          brand: "",
-          categories: "",
-          subCategory: "",
-          image: "",
-          discount: 0,
-          price: 0,
-          sellingPrice: 0,
-          productQty: "",
-          unit: "",
-          minimumOrderQty: 0,
-          availableQty: 0,
-          foodPrefence: "",
-          life: "",
-        });
+        
       }
     } catch (e) {
-      await deleteImageFromCloudinary(imageId);
+      imageId.map(async(item)=> await deleteImageFromCloudinary(item))
       console.log("Failed to upload");
       Swal.fire({
         title: "Error",
@@ -122,17 +130,14 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
   };
 
   const onEnterFocudNext = (e, id) => {
-    if (e.key === "Enter" || e.key == "Tab") document.getElementById(id);
-  };
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
 
-  const handleImageChange = (e) => {
-    const selectImage = e.target.files[0];
-    if (selectImage) {
-      const tempUrl = URL.createObjectURL(selectImage);
-      setTempImageURL(tempUrl);
-      setImage(selectImage);
+      document.getElementById(id)?.focus();
     }
   };
+
+  
 
   const validateFormData = () => {
     const errors = [];
@@ -158,41 +163,63 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const selectedImages = Array.from(e.target.files); // Convert FileList to Array
+    const newImageUrls = selectedImages.map((image) =>
+      URL.createObjectURL(image)
+    );
+
+    setTempImageURL((prevUrls) => [...prevUrls, ...newImageUrls]); // Append new images
+    setImage((prevImages) => [...prevImages, ...selectedImages]);
+  };
+
   const handleUploadImage = async () => {
-    if (image === "") {
+    if (image.length === 0) {
       Swal.fire({
-        title: "Please Select a Image",
+        title: "Please Select Images",
         icon: "warning",
       });
       return;
     }
-
+  
     try {
-      const imageData = await uploadImageToCloudinary(image);
-      console.log(imageData);
-      if (imageData.response === true) {
-        setProductData((prevData) => ({
-          ...prevData,
-          image: imageData.data.url,
-        }));
-        setImageId(imageData.data.public_id);
+      const uploadedImages = await Promise.all(
+        image.map((image) => uploadImageToCloudinary(image))
+      );
+  
+      const successfulUploads = uploadedImages.filter(
+        (imageData) => imageData.response === true
+      );
+  
+      if (successfulUploads.length === image.length) {
+        setProductData({
+          ...productData,
+          image: successfulUploads.map((imageData) => imageData.data.url),
+        });
         validateFormData();
+        
       } else {
         Swal.fire({
-          title: "Image Error",
+          title: "Image Upload Error",
           icon: "error",
-          text: imageData.data,
+          text: "Some images failed to upload. Please try again.",
         });
       }
     } catch (e) {
       console.error(e);
-      await deleteImageFromCloudinary(imageId);
-      setTempImageURL("");
+      Swal.fire({
+        title: "Error uploading images",
+        icon: "error",
+        text: "An error occurred while uploading images.",
+      });
     }
   };
+  
+  // Remove useEffect since it's no longer needed
+  console.log(image.length===tempImageUrl.length)
 
   const sellingPriceCalculator = () => {
-    alert(discountType);
+    
     const price = productData.price;
     const discount = productData.discount;
     if (discountType == "0") {
@@ -219,19 +246,39 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
           <input
             type="file"
             accept="image/*"
+            multiple
+            id="image-upload"
             className="px-2 text-black"
             onChange={handleImageChange}
+            style={{ display: "none" }}
             required
           />
-          {tempImageUrl !== "" && (
-            <Image
-              src={tempImageUrl}
+          <label htmlFor="image-upload">
+          <Button
+            variant="contained"
+            component="span"
+            startIcon={<MdCameraFront />}
+            color="primary"
+          >
+            Upload Images
+          </Button>
+        </label>
+        
+
+          {tempImageUrl !== "" && 
+            <>
+            {tempImageUrl.map((item, index)=>(
+              <Image
+              src={item}
               width={200}
               height={200}
               className="rounded-md w-36 h-36"
               alt="Grow Food"
             />
-          )}
+            ))}
+            
+            </>
+          }
         </div>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-2 ">
           <TextField
@@ -253,7 +300,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             name="description"
             variant="outlined"
             fullWidth
-            multiline
+            onKeyDownCapture={(e) => onEnterFocudNext(e, "brand")}
             value={productData.description}
             onChange={handleChange}
             error={errorField.includes("description")} // Check if 'name' is in errorField
@@ -265,13 +312,16 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             className="mb-4"
           />
           <Autocomplete
+            id="brand"
+            
             options={filteredBrands.map((brand) => brand.name)} // List of brands
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Brand"
+                onKeyDownCapture={(e) => onEnterFocudNext(e, "category")}
                 name="brand"
-                variant="outlined"
+                
                 fullWidth
                 className="mb-4"
                 error={errorField.includes("brand")} // Check if 'brand' is in errorField
@@ -284,11 +334,12 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
               setProductData({ ...productData, brand: newValue });
             }}
             value={productData.brand}
-            freeSolo // Allow typing a custom value
+            
           />
 
           <Autocomplete
             options={filteredCategories.map((item) => item.name)}
+            id="category"
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -296,6 +347,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
                 name="categories"
                 variant="outlined"
                 fullWidth
+                onKeyDownCapture={(e) => onEnterFocudNext(e, "subCategory")}
                 className="mb-4"
                 error={errorField.includes("categories")} // Check if 'name' is in errorField
                 helperText={
@@ -309,23 +361,75 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
               setProductData({ ...productData, categories: value });
             }}
             value={productData.categories}
-            freeSolo
+     
           ></Autocomplete>
 
-          <TextField
-            label="Sub-Category"
-            name="subCategory"
-            variant="outlined"
-            fullWidth
-            error={errorField.includes("subCategory")}
-            helperText={
-              errorField.includes("subCategory")
-                ? "subCategory is required"
-                : ""
-            }
+          <Autocomplete
+            options={subCategory}
+            id="subCategory"
             value={productData.subCategory}
-            onChange={handleChange}
-            className="mb-4"
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                error={errorField.includes("subCategory")}
+                helperText={
+                  errorField.includes("subCategory")
+                    ? "Sub Category is required"
+                    : ""
+                }
+                label="Sub Category"
+                name="subCategory"
+                fullWidth
+                
+                className="mb-4"
+                onKeyDownCapture={(e) => onEnterFocudNext(e, "type")}
+              />
+            )}
+            onInputChange={(e, value) => {
+              if (value == "Create Sub Category") {
+                Swal.fire({
+                  title: "Create Sub Category",
+                  icon: "info",
+                  input: "text",
+                  inputAutoFocus: true,
+                  inputLabel: "Enter Sub Category Name",
+                  showCancelButton: true,
+                  showConfirmButton: true,
+                  confirmButtonText: "Create",
+                  inputValidator: (inputValue) => {
+                    if (!inputValue) {
+                      return "Please enter a valid sub category name";
+                    }
+                    return null;
+                  },
+                }).then(async (result) => {
+                  if (result.isConfirmed) {
+                    const formData = { name: result.value };
+                    try {
+                      const res = await axios.post(createSubCategory, {
+                        formData,
+                      });
+                      if (res.status === 200) {
+                        Swal.fire({
+                          title: "Success",
+                          icon: "success",
+                          text: "Sub Category created successfully...",
+                        });
+                        dispatch(getSubCategories());
+                      }
+                    } catch (err) {
+                      console.log(err);
+                      Swal.fire(err.message);
+                    }
+                  }
+                });
+              } else {
+                setProductData({
+                  ...productData,
+                  subCategory: value,
+                });
+              }
+            }}
           />
 
           <Grid container spacing={2} alignItems="center" className="mb-4">
@@ -334,23 +438,28 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
               <TextField
                 select
                 label="Type"
+                id="type"
                 value={discountType}
-                onChange={(e) => setDiscountType(e.target.value)}
+                onChange={(e) => {setDiscountType(e.target.value)
+                  setProductData({...productData, discountType : discountType!=="1" ? "Rupees" : "Percentage"})
+                }}
                 variant="outlined"
                 fullWidth
+                onKeyDownCapture={(e) => onEnterFocudNext(e, "discount")}
               >
-                <MenuItem value="0">Percentage</MenuItem>
-                <MenuItem value="1">Rupees</MenuItem>
+                <MenuItem value="0"><FaPercent/></MenuItem>
+                <MenuItem value="1"><MdOutlineCurrencyRupee className="text-lg"/></MenuItem>
               </TextField>
             </Grid>
 
             {/* Input for discount value */}
             <Grid item xs={9}>
               <TextField
-                label="Discount"
+                label={`Discount in ${discountType=="1" ? "Rupees" : "Percentage"}`}
                 name="discount"
                 variant="outlined"
                 fullWidth
+                id="discount"
                 type="number"
                 error={errorField.includes("discount")}
                 helperText={
@@ -358,6 +467,8 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
                 }
                 value={productData.discount === 0 ? "" : productData.discount}
                 onChange={handleChange}
+                onKeyDownCapture={(e) => onEnterFocudNext(e, "price")}
+                onBlurCapture={sellingPriceCalculator}
               />
             </Grid>
           </Grid>
@@ -367,12 +478,14 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             helperText={errorField.includes("price") ? "price is required" : ""}
             label="Price"
             name="price"
+            id="price"
             variant="outlined"
             fullWidth
             type="number"
             value={productData.price === 0 ? "" : productData.price}
             onChange={handleChange}
             className="mb-4"
+            onKeyDownCapture={(e) => onEnterFocudNext(e, "unit")}
             onBlurCapture={sellingPriceCalculator}
           />
           <TextField
@@ -388,7 +501,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             fullWidth
             type="number"
             value={
-              productData.sellingPrice === 0 ? "" : productData.sellingPrice
+              productData.sellingPrice == 0 ? "" : productData.sellingPrice
             }
             onChange={handleChange}
             disabled
@@ -396,6 +509,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
           />
           <Autocomplete
             options={units}
+            id="unit"
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -408,6 +522,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
                 variant="outlined"
                 fullWidth
                 className="mb-4"
+                onKeyDownCapture={(e) => onEnterFocudNext(e, "prqty")}
               />
             )}
             onInputChange={(e, value) => {
@@ -457,10 +572,11 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
               }
             }}
             value={productData.unit}
-            freeSolo
+            
           ></Autocomplete>
 
           <TextField
+            id="prqty"
             label={`Product Quantity (${productData.unit})`}
             error={errorField.includes("productQty")}
             helperText={
@@ -474,6 +590,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             value={productData.productQty === 0 ? "" : productData.productQty}
             onChange={handleChange}
             className="mb-4"
+            onKeyDownCapture={(e) => onEnterFocudNext(e, "moq")}
           />
           <TextField
             error={errorField.includes("minimumOrderQty")}
@@ -486,6 +603,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             name="minimumOrderQty"
             variant="outlined"
             fullWidth
+            id="moq"
             type="number"
             value={
               productData.minimumOrderQty === 0
@@ -494,8 +612,10 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             }
             onChange={handleChange}
             className="mb-4"
+            onKeyDownCapture={(e) => onEnterFocudNext(e, "incdec")}
           />
           <TextField
+            id="incdec"
             label="Increase / Decrease by"
             error={errorField.includes("incDecBy")}
             helperText={
@@ -510,8 +630,10 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             value={productData.incDecBy === 0 ? "" : productData.incDecBy}
             onChange={handleChange}
             className="mb-4"
+            onKeyDownCapture={(e) => onEnterFocudNext(e, "aq")}
           />
           <TextField
+            id="aq"
             error={errorField.includes("availableQty")}
             helperText={
               errorField.includes("availableQty")
@@ -528,8 +650,10 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             }
             onChange={handleChange}
             className="mb-4"
+            onKeyDownCapture={(e) => onEnterFocudNext(e, "foodpref")}
           />
           <TextField
+            id="foodpref"
             label="Food Preference"
             name="foodPrefence"
             variant="outlined"
@@ -537,8 +661,10 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             value={productData.foodPrefence}
             onChange={handleChange}
             className="mb-4"
+            onKeyDownCapture={(e) => onEnterFocudNext(e, "life")}
           />
           <TextField
+            id="life"
             label="Shelf Life"
             name="life"
             variant="outlined"
@@ -546,6 +672,7 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
             value={productData.life}
             onChange={handleChange}
             className="mb-4"
+            onKeyDownCapture={(e) => onEnterFocudNext(e, "submit")}
           />
         </div>
         <div className="flex justify-between gap-2">
@@ -558,13 +685,30 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
           >
             Cancel
           </Button>
+          <div className="flex gap-4">
           <Button
+          variant="contained"
+          color="info"
+          onClick={()=>{
+            setProductData({defaultFormData})
+          }}
+          >
+            Reset
+          </Button>
+          <Button
+            
             onClick={handleUploadImage}
             variant="contained"
             color="success"
+            id="submit"
           >
-            Create Product
+            {image.length===tempImageUrl.length ? 
+            <span onClick={handleSubmit}>Create Product</span> :
+            <span onClick={handleUploadImage}>Upload Images</span>
+} 
           </Button>
+          
+          </div>
         </div>
       </div>
     </Box>

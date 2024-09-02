@@ -1,29 +1,41 @@
-import React, { useState } from 'react';
-import { FaSearch } from 'react-icons/fa';
-import { Autocomplete, TextField, InputAdornment, Dialog } from '@mui/material';
+import React, { useState } from "react";
+import { FaSearch } from "react-icons/fa";
+import { Autocomplete, TextField, InputAdornment, Dialog } from "@mui/material";
+import { useRouter } from "next/router";
+import CryptoJS from "crypto-js";
 
-import ProductDetails from '../Home/productDetails';
+import ProductDetails from "../product/Details";
 
 const Search = ({ products = [] }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [open, setOpen] = useState(false);
 
+  const router = useRouter();
   // Function to handle search input change
   const handleSearchChange = (event, value) => {
     setSearchTerm(value);
 
-    const foundProduct = Array.isArray(products) ? products.find((item) => item.name.toLowerCase() === value.toLowerCase()) : null;
+    const foundProduct = Array.isArray(products)
+      ? products.find((item) => item.name.toLowerCase() === value.toLowerCase())
+      : null;
     if (foundProduct) {
-      setSelectedProduct(foundProduct);
-      setOpen(true);
+      const encryptedProduct = CryptoJS.AES.encrypt(
+        JSON.stringify(foundProduct),
+        "2468"
+      ).toString();
+      router.push(
+        `/ProductDetails?thegrowfood=${encodeURIComponent(encryptedProduct)}`
+      );
     }
   };
 
   // Filtered products based on search term
-  const filteredProducts = Array.isArray(products) ? products.filter((product) =>
-    product.name.toLowerCase().startsWith(searchTerm.toLowerCase())
-  ) : [];
+  const filteredProducts = Array.isArray(products)
+    ? products.filter((product) =>
+        product.name.toLowerCase().startsWith(searchTerm.toLowerCase())
+      )
+    : [];
 
   return (
     <>
@@ -37,16 +49,16 @@ const Search = ({ products = [] }) => {
             {...params}
             InputProps={{
               ...params.InputProps,
-              type: 'search',
+              type: "search",
               placeholder: "Search",
               startAdornment: (
                 <InputAdornment position="start">
-                  <FaSearch style={{ color: '#1e4426', marginLeft: 8 }} />
+                  <FaSearch style={{ color: "#1e4426", marginLeft: 8 }} />
                 </InputAdornment>
               ),
               style: {
-                backgroundColor: '#f3f4f6',
-                color: 'black',
+                backgroundColor: "#f3f4f6",
+                color: "black",
                 padding: 0,
               },
             }}
@@ -55,10 +67,7 @@ const Search = ({ products = [] }) => {
         onInputChange={handleSearchChange}
       />
       <Dialog open={open} fullScreen onClose={() => setOpen(false)}>
-        <ProductDetails
-          product={selectedProduct}
-          setOpen={setOpen}
-        />
+        <ProductDetails product={selectedProduct} setOpen={setOpen} />
       </Dialog>
     </>
   );
