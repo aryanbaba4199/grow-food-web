@@ -174,6 +174,7 @@ const Users = () => {
           <div className="flex justify-between items-center">
             {status.map((item, index) => (
               <Tooltip
+                key={index}
                 title={`Current Status : ${open.userStatus}` ?? "Not Updated"}
               >
                 <button

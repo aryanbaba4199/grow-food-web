@@ -60,7 +60,7 @@ const ProductDetails = () => {
             <Typography className='bg-color-1 text-center'>You may alos intrested</Typography>
             <div className='flex flex-wrap gap-2 justify-between items-center my-4'>
                 {subProduct.map((item, index)=>(
-                    <div>
+                    <div key={index}>
                     <ProductCard item={item} key={index}/>
                     </div>
                 ))}

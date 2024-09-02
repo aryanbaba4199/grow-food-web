@@ -4,11 +4,7 @@ import { Html, Head, Main, NextScript } from 'next/document';
 export default function Document() {
   return (
     <Html lang="en">
-      <Head>
-      <title>Grow Food</title> 
-        <meta name="description" content="Grow Food - Service In Your Restaurants" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Head />
       <body>
         <Main />
         <NextScript />
