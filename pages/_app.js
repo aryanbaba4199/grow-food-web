@@ -26,7 +26,9 @@ export default function App({ Component, pageProps }) {
         <UserProvider>
           <Header setCollapse={setCollapse} collapse={collapse} />
           <main className="flex ">
+            <div className="md:block hidden">
             <SidebarMenu collapse = {collapse} />
+            </div>
             <div className="h-[90vh] w-full overflow-scroll">
             <Component {...pageProps} />
             </div>

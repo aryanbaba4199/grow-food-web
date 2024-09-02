@@ -23,7 +23,7 @@ const SidebarMenu = ({ collapse }) => {
   };
 
   return (
-    <Sidebar className="z-[2000]" collapsed={collapse}>
+    <Sidebar className="z-[500] h-full bg-gray-100" collapsed={collapse}>
       <Menu className="">
         <div className="mt-4">
           {sideBarData.map((item, index) => (
