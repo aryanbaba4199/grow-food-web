@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdOutlineProductionQuantityLimits } from "react-icons/md";
 import Createproduct from "../../Component/Admin/products/createproduct";
 import Orders from "../../Component/Admin/Orders/orders";
@@ -10,17 +10,21 @@ import { SiBrandfolder } from "react-icons/si";
 import { BiSolidCategoryAlt } from "react-icons/bi";
 
 import { useSelector } from "react-redux";
+import { decryptData } from "@/Context/userFunction";
 
 const Dashboard = () => {
   const [index, setIndex] = useState("");
+  const [user, setUser] = useState(null);
 
-  const { user } = useSelector((state) => state.auth);
+
+  useEffect(()=>{
+    const user = decryptData(localStorage.getItem("user"));
+    setUser(user);
+  }, [])
 
   return (
     <>
       <Analytics/>
-
-
 
       <div className="flex md:flex-row flex-col gap-2 flex-wrap items-center container px-8 py-4 ">
         <div
@@ -54,9 +58,9 @@ const Dashboard = () => {
       </div>
       <div>
         {index === 0 ? (
-          <Createproduct setIndex = {setIndex}/>
+          <Createproduct setIndex = {setIndex} user={user.user}/>
         ) : index === 1 ? (
-          <Orders />
+          <Orders user = {user.user}/>
         ) : index === 2 ? (
           <CreateBrand />
         ) : index === 3 ? (

@@ -1,3 +1,4 @@
+import { encryptData } from "@/Context/userFunction";
 import {
   LOGIN_SUCCESS,
   LOGIN_FAIL,
@@ -33,7 +34,7 @@ const initialAuthState = getInitialStateFromLocalStorage();
 const authReducer = (state = initialAuthState, action) => {
   switch (action.type) {
     case LOGIN_SUCCESS:
-      localStorage.setItem('token', action.payload);
+      localStorage.setItem('token', encryptData(action.payload));
       return {
         ...state,
         token: action.payload,
@@ -54,7 +55,7 @@ const authReducer = (state = initialAuthState, action) => {
         ...state,
       };
     case FETCH_USER_SUCCESS:
-      localStorage.setItem('user', JSON.stringify(action.payload));
+      localStorage.setItem('user', encryptData(action.payload));
       return {
         ...state,
         user: action.payload,

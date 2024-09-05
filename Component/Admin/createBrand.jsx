@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
-
   Typography,
   Dialog,
   DialogTitle,
@@ -11,12 +10,20 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Loader from "../helpers/loader";
-import { API_URL, deleteBrandbyId, updateBrandbyId, updateOrderbyId } from "@/Api";
+import {
+  API_URL,
+  deleteBrandbyId,
+  updateBrandbyId,
+  updateOrderbyId,
+} from "@/Api";
 import { useDispatch, useSelector } from "react-redux";
 import { getBrands } from "@/Redux/actions/productActions";
-import deleteImageFromCloudinary, { uploadImageToCloudinary } from "@/Context/functions";
+import deleteImageFromCloudinary, {
+  uploadImageToCloudinary,
+} from "@/Context/functions";
 import Swal from "sweetalert2";
 import { FaPlus } from "react-icons/fa";
+import { decryptData } from "@/Context/userFunction";
 
 const CreateBrand = () => {
   const [brandName, setBrandName] = useState("");
@@ -146,7 +153,7 @@ const CreateBrand = () => {
   const handleUpdate = async () => {
     if (!selectedBrand) return;
     setLoader(true);
- 
+
     try {
       const res = await axios.put(`${updateBrandbyId}/${selectedBrand._id}`, {
         name: brandName,
@@ -192,37 +199,41 @@ const CreateBrand = () => {
   return (
     <div>
       <div className="px-8">
-        <Typography variant="h4" className="mb-4 mt-4 flex justify-center items-center ">
+        <Typography
+          variant="h4"
+          className="mb-4 mt-4 flex justify-center items-center "
+        >
           <p className="flex bg-color-1 rounded-sm">
-          <span className="rounded-s-md bg-color-1 h-10 px-4">Brands</span>
-          <FaPlus onClick={()=>setOpen(true)} className="mx-2 my-1 hover:cursor-pointer bg-white text-green-700 rounded-full"/>
+            <span className="rounded-s-md bg-color-1 h-10 px-4">Brands</span>
+            <FaPlus
+              onClick={() => setOpen(true)}
+              className="mx-2 my-1 hover:cursor-pointer bg-white text-green-700 rounded-full"
+            />
           </p>
         </Typography>
         <div className="flex flex-wrap gap-4 items-center mt-8 justify-between">
-          
           {brands.map((item, index) => (
             <>
-            <div
-              key={index}
-              className="h-28 flex-1 border shadow-md shadow-black flex flex-col justify-center items-center cursor-pointer"
-              onClick={() => handleEdit(item)}
-            >
-              <img
-                src={
-                  item?.icon ||
-                  "https://media.designrush.com/inspiration_images/134802/conversions/_1511456315_653_apple-desktop.jpg"
-                }
-                className="w-24 h-20 rounded-lg"
-              />
-              <span className="bg-color-1 w-full text-center px-4 mt-2">{item.name}</span>
-            </div>
-            
+              <div
+                key={index}
+                className="h-28 flex-1 border shadow-md shadow-black flex flex-col justify-center items-center cursor-pointer"
+                onClick={() => handleEdit(item)}
+              >
+                <img
+                  src={
+                    item?.icon ||
+                    "https://media.designrush.com/inspiration_images/134802/conversions/_1511456315_653_apple-desktop.jpg"
+                  }
+                  className="w-24 h-20 rounded-lg"
+                />
+                <span className="bg-color-1 w-full text-center px-4 mt-2">
+                  {item.name}
+                </span>
+              </div>
             </>
           ))}
         </div>
       </div>
-
-     
 
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{editMode ? "Edit Brand" : "Create Brand"}</DialogTitle>
@@ -253,9 +264,17 @@ const CreateBrand = () => {
               <Button onClick={handleUpdate} color="primary">
                 Update
               </Button>
-              <Button onClick={handleDelete} color="error">
-                Delete
-              </Button>
+              {decryptData(localStorage.getItem("user")).user.userType ===
+                "Admin" && (
+                <Button
+                  onClick={() => {
+                    handleDelete();
+                  }}
+                  color="error"
+                >
+                  Delete
+                </Button>
+              )}
             </>
           ) : (
             <Button onClick={handleImageUpload} color="primary">

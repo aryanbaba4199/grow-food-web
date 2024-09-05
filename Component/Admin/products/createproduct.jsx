@@ -10,10 +10,10 @@ import axios from "axios";
 import { FaPercent } from "react-icons/fa";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import {
-  getBrands,
-  getCategories,
-  getSubCategories,
-  getUnit,
+  // getBrands,
+  // getCategories,
+  // getSubCategories,
+  // getUnit,
 } from "@/Redux/actions/productActions"; // Adjust the import path as needed
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -26,12 +26,12 @@ import deleteImageFromCloudinary, {
   uploadImageToCloudinary,
 } from "@/Context/functions";
 import { MdCameraFront } from "react-icons/md";
+import { getBrands, getCategories, getUnits, memoize } from "@/Context/productFunction";
+import { decryptData } from "@/Context/userFunction";
 
-
-
-
-const CreateProduct = ({ setIndex, setCreateMode }) => {
+const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   const defaultFormData = {
+    vendorId: "",
     name: "",
     description: "",
     brand: "",
@@ -68,11 +68,15 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
   const [discountType, setDiscountType] = useState(0);
 
   useEffect(() => {
-    dispatch(getBrands());
-    dispatch(getCategories());
-    dispatch(getUnit());
-    dispatch(getSubCategories());
-  }, [dispatch]);
+    const getItems = async()=>{
+      const b = decryptData(localStorage.getItem('brands'));
+      const c = decryptData(localStorage.getItem('categories'));
+      const u = memoize(getUnits, 'units');
+      const s = decryptData(localStorage.getItem('products')).map(item=>item.subCategory)
+    }
+    getItems();
+    
+  }, []);
 
   useEffect(() => {
     setFilteredBrands(brands);
@@ -85,10 +89,9 @@ const CreateProduct = ({ setIndex, setCreateMode }) => {
   useEffect(() => {
     const unitNames = unitsData.map((unit) => unit.name);
     setUnits([...unitNames, "Create Unit"]);
-   
   }, [unitsData]);
 
-console.log(productData)
+  console.log(productData);
   useEffect(() => {
     if (subCategoryData !== undefined) {
       const subCategoryName = subCategoryData?.map((item) => item.name);
@@ -116,10 +119,10 @@ console.log(productData)
           text: "Product Created successfully",
           icon: "success",
         });
-        
+        setTempImageURL([]);
       }
     } catch (e) {
-      imageId.map(async(item)=> await deleteImageFromCloudinary(item))
+      imageId.map(async (item) => await deleteImageFromCloudinary(item));
       console.log("Failed to upload");
       Swal.fire({
         title: "Error",
@@ -136,8 +139,6 @@ console.log(productData)
       document.getElementById(id)?.focus();
     }
   };
-
-  
 
   const validateFormData = () => {
     const errors = [];
@@ -191,20 +192,17 @@ console.log(productData)
         (imageData) => imageData.response === true
       );
   
-      if (successfulUploads.length === image.length) {
-        setProductData({
-          ...productData,
-          image: successfulUploads.map((imageData) => imageData.data.url),
-        });
-        validateFormData();
-        
-      } else {
-        Swal.fire({
-          title: "Image Upload Error",
-          icon: "error",
-          text: "Some images failed to upload. Please try again.",
-        });
-      }
+      const imageUrls = successfulUploads.map((imageData) => imageData.data.url);
+  
+      console.log("2", imageUrls);
+  
+      // Combine the updates into a single setProductData call
+      setProductData((prevProductData) => ({
+        ...prevProductData,
+        image: imageUrls,
+        vendorId: user._id,
+      }));
+  
     } catch (e) {
       console.error(e);
       Swal.fire({
@@ -215,11 +213,11 @@ console.log(productData)
     }
   };
   
+
   // Remove useEffect since it's no longer needed
-  console.log(image.length===tempImageUrl.length)
+  console.log(image.length === tempImageUrl.length);
 
   const sellingPriceCalculator = () => {
-    
     const price = productData.price;
     const discount = productData.discount;
     if (discountType == "0") {
@@ -254,31 +252,29 @@ console.log(productData)
             required
           />
           <label htmlFor="image-upload">
-          <Button
-            variant="contained"
-            component="span"
-            startIcon={<MdCameraFront />}
-            color="primary"
-          >
-            Upload Images
-          </Button>
-        </label>
-        
+            <Button
+              variant="contained"
+              component="span"
+              startIcon={<MdCameraFront />}
+              color="primary"
+            >
+              Upload Images
+            </Button>
+          </label>
 
-          {tempImageUrl !== "" && 
+          {tempImageUrl !== "" && (
             <>
-            {tempImageUrl.map((item, index)=>(
-              <Image
-              src={item}
-              width={200}
-              height={200}
-              className="rounded-md w-36 h-36"
-              alt="Grow Food"
-            />
-            ))}
-            
+              {tempImageUrl.map((item, index) => (
+                <Image
+                  src={item}
+                  width={200}
+                  height={200}
+                  className="rounded-md w-36 h-36"
+                  alt="Grow Food"
+                />
+              ))}
             </>
-          }
+          )}
         </div>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-2 ">
           <TextField
@@ -286,6 +282,7 @@ console.log(productData)
             name="name"
             variant="outlined"
             fullWidth
+            onBlurCapture={handleUploadImage}
             value={productData.name}
             onChange={handleChange}
             className="mb-4"
@@ -299,6 +296,7 @@ console.log(productData)
             label="Description"
             name="description"
             variant="outlined"
+            disabled={productData.name === ""}
             fullWidth
             onKeyDownCapture={(e) => onEnterFocudNext(e, "brand")}
             value={productData.description}
@@ -313,7 +311,7 @@ console.log(productData)
           />
           <Autocomplete
             id="brand"
-            
+            disabled={productData.image.length === 0}
             options={filteredBrands.map((brand) => brand.name)} // List of brands
             renderInput={(params) => (
               <TextField
@@ -321,7 +319,6 @@ console.log(productData)
                 label="Brand"
                 onKeyDownCapture={(e) => onEnterFocudNext(e, "category")}
                 name="brand"
-                
                 fullWidth
                 className="mb-4"
                 error={errorField.includes("brand")} // Check if 'brand' is in errorField
@@ -334,12 +331,12 @@ console.log(productData)
               setProductData({ ...productData, brand: newValue });
             }}
             value={productData.brand}
-            
           />
 
           <Autocomplete
             options={filteredCategories.map((item) => item.name)}
             id="category"
+            disabled={productData.image.length === 0}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -361,12 +358,12 @@ console.log(productData)
               setProductData({ ...productData, categories: value });
             }}
             value={productData.categories}
-     
           ></Autocomplete>
 
           <Autocomplete
             options={subCategory}
             id="subCategory"
+            disabled={productData.image.length === 0}
             value={productData.subCategory}
             renderInput={(params) => (
               <TextField
@@ -380,7 +377,6 @@ console.log(productData)
                 label="Sub Category"
                 name="subCategory"
                 fullWidth
-                
                 className="mb-4"
                 onKeyDownCapture={(e) => onEnterFocudNext(e, "type")}
               />
@@ -436,29 +432,46 @@ console.log(productData)
             {/* Dropdown for selecting discount type */}
             <Grid item xs={3}>
               <TextField
+                error={errorField.includes("discountType")}
+                helperText={
+                  errorField.includes("discountType") ? "required" : ""
+                }
                 select
                 label="Type"
                 id="type"
-                value={discountType}
-                onChange={(e) => {setDiscountType(e.target.value)
-                  setProductData({...productData, discountType : discountType!=="1" ? "Rupees" : "Percentage"})
+                disabled={productData.image.length === 0}
+                value={productData.discountType}
+                onChange={(e) => {
+                  setDiscountType(e.target.value);
+                  setProductData({
+                    ...productData,
+                    discountType:
+                      discountType !== "1" ? "Rupees" : "Percentage",
+                  });
                 }}
                 variant="outlined"
                 fullWidth
                 onKeyDownCapture={(e) => onEnterFocudNext(e, "discount")}
               >
-                <MenuItem value="0"><FaPercent/></MenuItem>
-                <MenuItem value="1"><MdOutlineCurrencyRupee className="text-lg"/></MenuItem>
+                <MenuItem value="0">
+                  <FaPercent />
+                </MenuItem>
+                <MenuItem value="1">
+                  <MdOutlineCurrencyRupee className="text-lg" />
+                </MenuItem>
               </TextField>
             </Grid>
 
             {/* Input for discount value */}
             <Grid item xs={9}>
               <TextField
-                label={`Discount in ${discountType=="1" ? "Rupees" : "Percentage"}`}
+                label={`Discount in ${
+                  discountType == "1" ? "Rupees" : "Percentage"
+                }`}
                 name="discount"
                 variant="outlined"
                 fullWidth
+                disabled={productData.image.length === 0}
                 id="discount"
                 type="number"
                 error={errorField.includes("discount")}
@@ -477,6 +490,7 @@ console.log(productData)
             error={errorField.includes("price")}
             helperText={errorField.includes("price") ? "price is required" : ""}
             label="Price"
+            disabled={productData.image.length === 0}
             name="price"
             id="price"
             variant="outlined"
@@ -509,6 +523,7 @@ console.log(productData)
           />
           <Autocomplete
             options={units}
+            disabled={productData.image.length === 0}
             id="unit"
             renderInput={(params) => (
               <TextField
@@ -572,10 +587,10 @@ console.log(productData)
               }
             }}
             value={productData.unit}
-            
           ></Autocomplete>
 
           <TextField
+            disabled={productData.image.length === 0}
             id="prqty"
             label={`Product Quantity (${productData.unit})`}
             error={errorField.includes("productQty")}
@@ -593,6 +608,7 @@ console.log(productData)
             onKeyDownCapture={(e) => onEnterFocudNext(e, "moq")}
           />
           <TextField
+            disabled={productData.image.length === 0}
             error={errorField.includes("minimumOrderQty")}
             helperText={
               errorField.includes("minimumOrderQty")
@@ -616,6 +632,7 @@ console.log(productData)
           />
           <TextField
             id="incdec"
+            disabled={productData.image.length === 0}
             label="Increase / Decrease by"
             error={errorField.includes("incDecBy")}
             helperText={
@@ -633,6 +650,7 @@ console.log(productData)
             onKeyDownCapture={(e) => onEnterFocudNext(e, "aq")}
           />
           <TextField
+            disabled={productData.image.length === 0}
             id="aq"
             error={errorField.includes("availableQty")}
             helperText={
@@ -653,6 +671,7 @@ console.log(productData)
             onKeyDownCapture={(e) => onEnterFocudNext(e, "foodpref")}
           />
           <TextField
+            disabled={productData.image.length === 0}
             id="foodpref"
             label="Food Preference"
             name="foodPrefence"
@@ -665,6 +684,7 @@ console.log(productData)
           />
           <TextField
             id="life"
+            disabled={productData.image.length === 0}
             label="Shelf Life"
             name="life"
             variant="outlined"
@@ -686,28 +706,24 @@ console.log(productData)
             Cancel
           </Button>
           <div className="flex gap-4">
-          <Button
-          variant="contained"
-          color="info"
-          onClick={()=>{
-            setProductData({defaultFormData})
-          }}
-          >
-            Reset
-          </Button>
-          <Button
-            
-            onClick={handleUploadImage}
-            variant="contained"
-            color="success"
-            id="submit"
-          >
-            {image.length===tempImageUrl.length ? 
-            <span onClick={handleSubmit}>Create Product</span> :
-            <span onClick={handleUploadImage}>Upload Images</span>
-} 
-          </Button>
-          
+            <Button
+              variant="contained"
+              color="info"
+              onClick={() => {
+                setProductData( defaultFormData );
+                setTempImageURL([]);
+              }}
+            >
+              Reset
+            </Button>
+            <Button
+              onClick={handleUploadImage}
+              variant="contained"
+              color="success"
+              id="submit"
+            >
+              <span onClick={validateFormData}>Create Product</span>
+            </Button>
           </div>
         </div>
       </div>

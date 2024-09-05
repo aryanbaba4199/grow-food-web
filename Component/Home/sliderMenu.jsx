@@ -20,10 +20,10 @@ const Slide = ({ products, title, timer, filter }) => {
 
 
   return (
-    <div className="flex flex-col">
-      <div className={`flex justify-between rounded-sm py-1 bg-gradient-to-r from-[#5fd579] via-[#19a232] to-[#1e4426] `}>
-        <p className="pl-8 font-bold text-lg">{title}</p>
-        <div className="md:flex hidden gap-2 w-[70%]">
+    <div className="flex flex-col txt-1">
+      <div className={`flex justify-between border border-color-1 rounded-xl rounded-r-none `}>
+        <p className="pl-8 font-bold txt-1 py-1">{title}</p>
+        <div className="md:flex hidden gap-2 w-[70%] py-1">
           {timer && (
             <>
               <Countdown date={Date.now() + 5.04e7} renderer={SliderMenu} />
@@ -31,7 +31,7 @@ const Slide = ({ products, title, timer, filter }) => {
           )}
         </div>
         <div className="flex items-end">
-          <button onClick={()=>router.push("/products")} className="rounded-md hover:cursor-pointer px-2 text-white font-semibold">
+          <button onClick={()=>router.push("/products")} className="bg-color-1 h-full hover:cursor-pointer px-6 text-white font-semibold">
             View All
           </button>
         </div>
@@ -65,7 +65,7 @@ const Slide = ({ products, title, timer, filter }) => {
         >
           {products.map((product, index) => (
             <div
-              className="flex border-2 ml-2 p-2 rounded-sm  flex-col justify-center items-center hover:cursor-pointer"
+              className="flex border-2 mt-2 ml-2 p-2 rounded-sm  flex-col justify-center items-center hover:cursor-pointer"
               key={index}
               onClick={()=>filter(product.name)}
             >
@@ -78,7 +78,7 @@ const Slide = ({ products, title, timer, filter }) => {
                 className="w-28 h-28 shadow-md shadow-black border-1 border-black rounded-full"
               />
               <p className="font-semibold mt-2">
-                {product?.name || "Ammz construction"}
+                {product?.name || "Grow Food"}
               </p>
             </div>
           ))}

@@ -14,14 +14,15 @@ export const GET_SUBCATEGORY = 'GET_SUBCATEGORY';
 // Use the correct URL for React Native emulator
 const API_URL = productsAPi;
 
-export const getProducts = () => async dispatch => {
-  try {
-    const response = await axios.get(API_URL);
-    dispatch({ type: GET_PRODUCTS, payload: response.data });
-  } catch (error) {
-    console.error('Error fetching products:', error);
-  }
-};
+// export const getProducts = () => async dispatch => {
+//   try {
+//     const response = await axios.get(API_URL);
+//     dispatch({ type: GET_PRODUCTS, payload: response.data });
+//     localStorage.setItem("products", JSON.stringify(res.data))
+//   } catch (error) {
+//     console.error('Error fetching products:', error);
+//   }
+// };
 
 export const getProduct = (id) => async (dispatch) => {
   try {

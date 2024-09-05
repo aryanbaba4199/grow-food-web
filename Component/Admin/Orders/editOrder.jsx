@@ -166,6 +166,11 @@ const EditOrder = ({ order, productDetails, setOpen }) => {
         </Grid>
       </DialogContent>
       <DialogActions>
+        {/* {JSON.parse(localStorage.getItem('user')).user.userStatus==="Verified" && JSON.parse(localStorage.getItem('user')).userType==="Admin" &&
+        <Button>
+          Delete Product
+        </Button>
+        } */}
         <Button variant="contained"  onClick={() => handleUpdateOrder()} color="success">
           Update
         </Button>

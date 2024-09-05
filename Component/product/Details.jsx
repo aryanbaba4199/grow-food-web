@@ -135,7 +135,9 @@ const Details = ({ product }) => {
       setQty(qty + (product.incDecBy !== undefined ? product.incDecBy : 1));
     }
   };
-  console.log(product);
+
+  console.log(product)
+
   return (
     <>
       <div>
@@ -156,12 +158,13 @@ const Details = ({ product }) => {
               transitionDuration={700}
               dotListClass="custom-dot-list-style"
             >
-              {product.image.map((imageUri, index) => (
-                <div key={index} className="w-full">
+              {(product.image.length===0 ? ["https://www.nbu.ac.in/img/dept/anthropology/slider/slider3.jpg"] : product.image).map((imageUri, index) => (
+                <div key={index} className="w-full"  onClick={()=>console.log(imageUri)}>
                   <img
-                    src={imageUri}
+                    src={imageUri ? imageUri : "https://www.nbu.ac.in/img/dept/anthropology/slider/slider3.jpg"}
                     alt={`Product Image ${index + 1}`}
-                    className="w-full h-auto rounded-md"
+                    className="w-full h-96 rounded-md"
+                   
                   />
                 </div>
               ))}
@@ -180,7 +183,7 @@ const Details = ({ product }) => {
                 </IconButton>
               </Tooltip>
             </div>
-            <div className="mt-4 w-full flex gap-2 justify-center md:relative fixed bottom-0 items-center">
+            <div className="mt-4 z-[200] w-full flex gap-2 justify-center md:relative fixed bottom-0 items-center">
               <Button
                 onClick={handleCart}
                 variant="contained"
@@ -220,7 +223,7 @@ const Details = ({ product }) => {
                 <div className="flex ml-4 justify-center items-center bg-color-1 px-4 rounded-md">
                   <FaRupeeSign className="mt-[2px]" />
                   <span className="text-xl font-bold ml-1">
-                    {product.price - (product.price * product.discount) / 100}
+                    {product.sellingPrice?? 100}
                   </span>
                 </div>
               </div>

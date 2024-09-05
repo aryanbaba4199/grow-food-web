@@ -6,8 +6,9 @@ import Swal from "sweetalert2";
 import Loader from "@/Component/helpers/loader";
 import { MdDelete } from "react-icons/md";
 import { useRouter } from "next/router";
-import { Dialog } from "@mui/material";
+import { Button, Dialog, Typography } from "@mui/material";
 import Checkout from "@/Component/checkout/checkout";
+import { decryptData } from "@/Context/userFunction";
 
 const Cart = () => {
   const [cartData, setCartData] = useState([]);
@@ -25,7 +26,7 @@ const Cart = () => {
         ? localStorage.getItem("user")
         : "";
       if (userid !== "") {
-        const user = JSON.parse(userid);
+        const user = decryptData(userid);
         setUserId(user.user._id);
         getCartData(user.user._id);
       }
@@ -36,6 +37,7 @@ const Cart = () => {
   }, []);
 
   const getCartData = async (id) => {
+    console.log(id);
     setLoader(true);
     try {
       const res = await axios.get(`${getCartbyUser}/${id}`);
@@ -46,6 +48,7 @@ const Cart = () => {
           } else {
             acc[item.productId].qty += item.qty;
           }
+          setLoader(false);
           return acc;
         }, {});
 
@@ -54,30 +57,36 @@ const Cart = () => {
         getProductsfromId(productIds);
       }
     } catch (e) {
+      setLoader(false);
       console.error(e);
     }
   };
 
-  const getProductsfromId = async (productIds) => {
-    try {
-      const productDetails = await Promise.all(
-        productIds.map(async (id) => {
-          const res = await axios.get(`${getProductbyId}/${id}`);
-          return res.data;
-        })
-      );
-      setCartData(productDetails);
-      setLoader(false);
-    } catch (e) {
-      console.error(e);
-      setLoader(false);
-    }
-  };
+  useEffect(() => {
+    const product = decryptData(localStorage.getItem("products")).filter(
+      (item) => userCartIds.map((id) => id.productId).includes(item._id)
+    );
+    setCartData(product);
+  }, [userCartIds, loader]);
 
-  const deleteCart = async (productId) => {
+  // const getProductsfromId = async (productIds) => {
+  //   try {
+  //     const productDetails = await Promise.all(
+  //       productIds.map(async (id) => {
+  //         const res = await axios.get(`${getProductbyId}/${id}`);
+  //         return res.data;
+  //       })
+  //     );
+  //     setCartData(productDetails);
+  //     setLoader(false);
+  //   } catch (e) {
+  //     console.error(e);
+  //     setLoader(false);
+  //   }
+  // };
+
+  const deleteCart = async (id) => {
     setLoader(true);
-    const cartId = userCartIds.find((item) => item.productId === productId);
-    const id = cartId._id;
     try {
       const res = await axios.delete(`${deleteCartItem}/${id}`);
       if (res.status === 200) {
@@ -86,15 +95,15 @@ const Cart = () => {
           icon: "success",
           text: res.data.message,
         });
-        getCartData(userId);
+        getCartData(user.user._id);
         setLoader(false);
       }
     } catch (e) {
-      Swal.fire({
-        title: "Failed",
-        icon: "error",
-        text: e.message,
-      });
+      // Swal.fire({
+      //   title: "Failed",
+      //   icon: "error",
+      //   text: e.message,
+      // });
       setLoader(false);
       console.error(e);
     }
@@ -102,7 +111,7 @@ const Cart = () => {
 
   const handleCheckoutAll = () => {
     if (cartData.length > 0) {
-      // Navigate to the checkout page with all cart items
+     
       setOpen(true);
     } else {
       Swal.fire({
@@ -112,6 +121,8 @@ const Cart = () => {
       });
     }
   };
+
+  console.log(userCartIds);
 
   return (
     <>
@@ -129,15 +140,30 @@ const Cart = () => {
               <p>No Cart Item Found</p>
             </div>
           )}
-          <div className="flex flex-row gap-4 flex-wrap justify-between w-fit mt-2 px-4">
+          <div className="md:flex grid grid-cols-2 md:mt-2 mt-14 flex-row gap-4 flex-wrap justify-between w-fit  px-4">
             {cartData.map((item, index) => (
+              <>
+              <div>
               <ProductCard
                 item={item}
                 key={index}
-                isCart={true}
-                deleteCartItem={deleteCart}
-                qty={userCartIds.find((cart) => cart.productId === item._id)?.qty}
+                
+                qty={
+                  userCartIds.find((cart) => cart.productId === item._id)?.qty
+                }
               />
+              <div className="flex justify-between items-center mt-1">
+              <span className="txt-1">Quantity : {userCartIds[index]?.qty}</span>
+              <Button variant="contained" color="warning" style={{
+                padding : 2,
+                paddingLeft : 5,
+                paddingRight : 5,
+                margin :0,
+              }} onClick={()=>deleteCart(userCartIds[index]?._id)}>Delete Cart</Button>
+
+              </div>
+              </div>
+              </>
             ))}
           </div>
           {userId !== "" && cartData.length > 0 && (
@@ -154,11 +180,10 @@ const Cart = () => {
       )}
       <Dialog open={open} fullScreen>
         <Checkout
-          setOpen={setOpen}
-          products = {cartData}
-          setCopen={setOpen}
-          quantities = {userCartIds}
-          deleteCart = {deleteCart}
+        
+          products={cartData}
+          
+          
         />
       </Dialog>
     </>

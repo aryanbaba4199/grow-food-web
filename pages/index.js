@@ -9,7 +9,7 @@ const index = () => {
   
   return (
     <>
-      <div className='bg-gray-100'>
+      <div className='bg-gray-100 w-full'>
           <Home/>
           
       </div>

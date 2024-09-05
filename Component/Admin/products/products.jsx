@@ -17,6 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import Swal from "sweetalert2";
+import { decryptData } from "@/Context/userFunction";
 
 const Products = () => {
   const [open, setOpen] = useState(false);
@@ -24,13 +25,7 @@ const Products = () => {
   const [editMode, setEditMode] = useState(false);
   const [createMode, setCreateMode] = useState(false);
   const [loader, setLoader] = useState(true);
-
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(getProducts());
-  }, [dispatch]);
-
-  const products = useSelector((state) => state.products.products);
+  const [products, setProducts] = useState([]);
 
   const handleClickOpen = (product) => {
     setSelectedProduct(product);
@@ -42,6 +37,16 @@ const Products = () => {
     setEditMode(false);
     setSelectedProduct(null);
   };
+
+  useEffect(() => {
+    const x = decryptData(localStorage.getItem("products"));
+    const user = decryptData(localStorage.getItem("user")).user;
+    if (user && user.userType === "Admin" && user.userStatus === "Verified") {
+      setProducts(x);
+    } else {
+      setProducts(x.filter((item) => item.vendorId == user._d));
+    }
+  }, []);
 
   const deleteProduct = async (id) => {
     console.log("Deleted");

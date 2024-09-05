@@ -10,6 +10,7 @@ import UserContext from "@/userContext";
 import Loader from "@/Component/helpers/loader";
 import Swal from "sweetalert2";
 import { MdDelete, MdDownload } from "react-icons/md";
+import { decryptData } from "@/Context/userFunction";
 
 const Orders = () => {
   const { user } = useContext(UserContext);
@@ -37,7 +38,7 @@ const Orders = () => {
       let parsedAddresses = [];
       if (addresses) {
         try {
-          parsedAddresses = JSON.parse(addresses);
+          parsedAddresses = decryptData(addresses);
         } catch (e) {
           console.error("Failed to parse address:", e);
           parsedAddresses = []; // Provide a fallback value

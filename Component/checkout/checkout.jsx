@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext } from "react";
 import { getuserAddress, createOrderAPI } from "@/Api";
 import UserContext from "@/userContext";
 
-
 import {
   Card,
   CardContent,
@@ -19,6 +18,8 @@ import { useRouter } from "next/router";
 import { IoMdCloseCircle } from "react-icons/io";
 import axios from "axios";
 import { FaCheckDouble } from "react-icons/fa";
+import orders from "@/pages/admin/orders";
+import { decryptData } from "@/Context/userFunction";
 
 const Checkout = ({
   products,
@@ -35,7 +36,9 @@ const Checkout = ({
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    if (user.user) getAddress();
+    if (user.user) {
+      setAddress(decryptData(localStorage.getItem("userAddress")));
+    }
   }, [user]);
 
   useEffect(() => {
@@ -50,23 +53,21 @@ const Checkout = ({
     }
   }, [products, quantities]);
 
-  const getAddress = async () => {
-    try {
-      const res = await axios.get(`${getuserAddress}/${user.user._id}`);
-      if (res.status === 200) setAddress(res.data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  //
 
   const handleCheckOut = async () => {
     if (!addressId) {
-      alert("Please select an address");
+    Swal.fire({
+      title: 'Addresses',
+      icon: 'warning',
+      text: 'Please select an address'
+    })
       return;
     }
 
     const orderDetails = calculatedPrices.map((item) => ({
       productId: item.productId,
+      vendorId: item.vendorId,
       userId: user.user._id,
       addressId,
       quantity: item.quantity,
@@ -79,13 +80,16 @@ const Checkout = ({
       const res = await axios.post(createOrderAPI, { orders: orderDetails });
       if (res.status === 200) {
         Swal.fire("Success", "Order Created Successfully", "success");
-       
+
         setCopen(false);
         router.push("/");
+        if (deleteCart !== undefined ) {
+          for (const item of orderDetails) {
+            await deleteCart(item.productId);
+          }
+        }
       }
-      if (deleteCart !== undefined) {
-        deleteCart();
-      }
+      
     } catch (e) {
       Swal.fire("Error", e.message, "error");
     }

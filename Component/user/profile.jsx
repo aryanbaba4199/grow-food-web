@@ -22,6 +22,7 @@ import Image from "next/image";
 import { updateUserDetails } from "@/Api";
 import deleteImageFromCloudinary from "@/Context/functions";
 import { uploadImageToCloudinary } from "@/Context/functions";
+import { encryptData } from "@/Context/userFunction";
 
 const defaultformData = {
   name: "",
@@ -112,7 +113,7 @@ const Profile = () => {
       const res = await axios.get(`${getuserAddress}/${user.user._id}`);
       if (res.status === 200) {
         console.log("Success", res.data);
-        localStorage.setItem("userAddress", JSON.stringify(res.data));
+        localStorage.setItem("userAddress", encryptData(res.data));
         setAddress(res.data);
       }
     } catch (e) {

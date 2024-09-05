@@ -19,11 +19,11 @@ export const login = (email, password) => async (dispatch) => {
     localStorage.setItem("token", token);
     dispatch({ type: LOGIN_SUCCESS, payload: token });
     dispatch({ type: FETCH_USER_SUCCESS, payload: user });
-    alert("Logged in successfully");
+    
   } catch (error) {
     console.error("Login error:", error);
     dispatch({ type: LOGIN_FAIL });
-    alert("Login failed");
+   
   }
 };
 
@@ -46,20 +46,20 @@ export const logout = () => (dispatch) => {
   dispatch({ type: LOGOUT });
 };
 
-export const fetchUserDetails = () => async (dispatch) => {
-  try {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const response = await axios.get(`${API_URL}/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      dispatch({ type: FETCH_USER_SUCCESS, payload: response.data });
-    }
-  } catch (error) {
-    console.error("Failed to fetch user details:", error);
-    dispatch({ type: FETCH_USER_FAIL });
-  }
-};
+// export const fetchUserDetails = () => async (dispatch) => {
+//   try {
+//     const token = localStorage.getItem("token");
+//     if (token) {
+//       const response = await axios.get(`${API_URL}/me`, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       });
+//       dispatch({ type: FETCH_USER_SUCCESS, payload: response.data });
+//     }
+//   } catch (error) {
+//     console.error("Failed to fetch user details:", error);
+//     dispatch({ type: FETCH_USER_FAIL });
+//   }
+// };
 

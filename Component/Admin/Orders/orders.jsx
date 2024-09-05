@@ -4,8 +4,9 @@ import { fetchOrders } from "@/Redux/actions/orderAction";
 import OrderCard from "./orderCard";
 import { Typography } from "@mui/material";
 
-const Orders = () => {
+const Orders = ({user}) => {
   const [ordersData, setOrdersData] = useState([]);
+  
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -14,7 +15,7 @@ const Orders = () => {
 
   const { adminOrders } = useSelector((state) => state.orders);
 
-  console.log("Orders", adminOrders);
+   
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -28,7 +29,7 @@ const Orders = () => {
       </Typography>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {adminOrders?.map((order) => (
-          <OrderCard key={order._id} order={order} />
+          <OrderCard key={order._id} order={order} user={user}  />
         ))}
       </div>
     </div>

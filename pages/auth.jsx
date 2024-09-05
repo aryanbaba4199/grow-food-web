@@ -11,6 +11,7 @@ import { logo_uri } from "@/Api";
 import Loader from "@/Component/helpers/loader";
 import { data } from "autoprefixer";
 import { useDispatch } from "react-redux";
+import { encryptData } from "@/Context/userFunction";
 
 const AuthComponent = () => {
   const [authType, setAuthType] = useState("SignIn");
@@ -58,8 +59,8 @@ const AuthComponent = () => {
       try {
         const response = await axios.post(`${userlogin}`, { email, password });
         const { token } = response.data;
-        console.log(response.data);
-        localStorage.setItem("token", token);
+        
+
         setToken(token);
         const res = await axios.get(`${usersAPi}/me`, {
           headers: {
@@ -68,7 +69,9 @@ const AuthComponent = () => {
         });
         if (res.status === 200) {
           setUser(res.data);
-          console.log("user res", res.data);
+          localStorage.setItem('token', encryptData(token));
+          localStorage.setItem('user', encryptData(res.data));
+          router.reload();
         }
         setLoader(false);
 
@@ -77,7 +80,7 @@ const AuthComponent = () => {
           icon: "success",
           text: "Log in Successfully",
         });
-        dispatch(fetchUserDetails());
+       
         router.push("/");
         
       } catch (error) {
@@ -120,6 +123,8 @@ const AuthComponent = () => {
       }
     }
   };
+
+ 
 
   return (
     <>

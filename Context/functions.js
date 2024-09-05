@@ -1,5 +1,6 @@
 import axios from "axios";
 import dynamic from 'next/dynamic';
+import { decryptData } from "./userFunction";
 
 // Dynamically import jsPDFInvoiceTemplate only on the client side
 const jsPDFInvoiceTemplate = dynamic(() => import('jspdf-invoice-template'), { ssr: false });
@@ -188,3 +189,17 @@ export const getUserGeoLocation = async () => {
   
 
 
+export const whosVisiting = ()=>{
+  const user = decryptData(localStorage.getItem('user'));
+  
+  if(user && user.user.userStatus==='Verified') {
+    console.log(user);
+    if(user.user.userType==='Admin'){
+      return "Admin";
+    }else if(user.user.userType==='Vendor'){
+      return "Vendor";
+    }else if(user.user.userType==='Restaurant'){
+      return "Restaurant";
+    }
+  }
+}

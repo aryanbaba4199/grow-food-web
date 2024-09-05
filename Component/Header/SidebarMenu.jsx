@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import Link from "next/link";
 import { GrUserAdmin } from "react-icons/gr";
@@ -6,9 +6,12 @@ import { AdminMenu, sideBarData } from "@/constants";
 import UserContext from "@/userContext";
 import { useRouter } from "next/router";
 import { FaUser } from "react-icons/fa";
+import { whosVisiting } from "@/Context/functions";
+import { decryptData } from "@/Context/userFunction";
 
 const SidebarMenu = ({ collapse }) => {
-  const { user, token } = useContext(UserContext);
+  
+  const [user, setUser] = useState("");
   const router = useRouter();
 
   const handleSignOut = () => {
@@ -21,29 +24,45 @@ const SidebarMenu = ({ collapse }) => {
       console.error(e);
     }
   };
+  let token;
+
+  useEffect(() => {
+    
+    const user = decryptData(localStorage.getItem("user"));
+    setUser(user);
+    const tokenData = decryptData(localStorage.getItem("token"));
+    token = tokenData
+
+  }, []);
+
+
+
 
   return (
-    <Sidebar className="z-[500] h-full bg-gray-100" collapsed={collapse}>
+    <Sidebar
+      className="z-[500] h-full bg-gray-100 scrollbar"
+      collapsed={collapse}
+    >
       <Menu className="">
         <div className="mt-4">
           {sideBarData.map((item, index) => (
             <>
               <MenuItem>
-                <Link
-                  href={`${item.path}`}
+                <span
+                  // href={`${item.path}`}
+                  onClick={() => router.push(`${item.path}`)}
                   className="flex gap-4 px-2 rounded-md py-1"
                 >
                   <span className="mt-1 txt-1 text-lg">{item.icon}</span>
                   <span className="txt-1">{item.name}</span>
-                </Link>
+                </span>
               </MenuItem>
             </>
           ))}
         </div>
         <div>
-          {user &&
-            user?.user?.userType === "Admin" &&
-            user?.user?.userStatus === "Verified" && (
+          {(user && user?.user?.userType === "Admin") ||
+            (user?.user?.userType === "Vendor" && (
               <SubMenu
                 label="Admin"
                 icon={<GrUserAdmin />}
@@ -51,33 +70,42 @@ const SidebarMenu = ({ collapse }) => {
               >
                 {AdminMenu.map((item, index) => (
                   <MenuItem>
-                    <Link
-                      href={`${item.path}`}
+                    <span
+                      onClick={() => router.push(`${item.path}`)}
                       className="flex gap-4 px-2 rounded-md"
                     >
                       <span className="mt-1 txt-1 text-lg">{item.icon}</span>
                       <span className="txt-1">{item.name}</span>
-                    </Link>
+                    </span>
                   </MenuItem>
                 ))}
               </SubMenu>
-            )}
-          <MenuItem>
-            {token ? (
-              <span className="flex  gap-4 txt-1" onClick={handleSignOut}>
+            ))}
+
+          {user ? (
+            <MenuItem>
+              <span
+                className="flex  gap-4 txt-1 rounded-md"
+                onClick={handleSignOut}
+              >
                 <FaUser className="mt-1 ml-2" />
                 <span className="">Log Out</span>{" "}
               </span>
-            ) : (
-              <span className="flex  gap-4 txt-1" onClick={()=>router.push("/auth")}>
+            </MenuItem>
+          ) : (
+            <MenuItem>
+              <span
+                className="flex  gap-4 txt-1 rounded-md"
+                onClick={() => router.push("/auth")}
+              >
                 <span>
                   {" "}
                   <FaUser className="mt-1 ml-2" />
                 </span>{" "}
                 <span>Log In</span>
               </span>
-            )}
-          </MenuItem>
+            </MenuItem>
+          )}
         </div>
       </Menu>
     </Sidebar>

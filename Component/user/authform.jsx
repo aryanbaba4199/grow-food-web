@@ -46,7 +46,11 @@ const Authform = ({
     }
   }
 
-  console.log(shopAddress)
+  const onEnterFocudNext = (event, id) => {
+    if(event.key==='Tab' || event.key==='Enter'){
+      document.getElementById(id).focus();
+    }
+  };
 
   return (
     <>
@@ -61,6 +65,7 @@ const Authform = ({
                 <div className="grid md:grid-cols-2 grid-cols-1 w-full justify-between items-center gap-4">
                   <TextField
                     label="Shop Name"
+                   
                     fullWidth
                     margin="normal"
                     value={shopName}
@@ -117,19 +122,23 @@ const Authform = ({
               fullWidth
               margin="normal"
               value={email}
+              onKeyDownCapture={(e)=>onEnterFocudNext(e, "password")}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
             />
             <TextField
               label="Password"
               fullWidth
+              id="password"
               margin="normal"
               value={password}
+              onKeyDownCapture={(e)=>onEnterFocudNext(e, "signinBtn")}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
             />
             <div className="flex justify-between items-center">
               <Button
+              
                 variant="contained"
                 color="inherit"
                 onClick={handleAuthSwitch}
@@ -138,6 +147,7 @@ const Authform = ({
               </Button>
               <Button
                 variant="contained"
+                    id="signinBtn"
                 color="primary"
                 onClick={handleSubmit}
                 style={styles.button}
