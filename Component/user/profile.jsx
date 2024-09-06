@@ -112,7 +112,7 @@ const Profile = () => {
     try {
       const res = await axios.get(`${getuserAddress}/${user.user._id}`);
       if (res.status === 200) {
-        console.log("Success", res.data);
+       
         localStorage.setItem("userAddress", encryptData(res.data));
         setAddress(res.data);
       }
@@ -127,17 +127,17 @@ const Profile = () => {
     } else {
       try {
         const data = await uploadImageToCloudinary(image);
-        console.log("data:", data);
-        console.log(data.response);
+    
+
         if (data.response) {
-          console.log("setting");
+         
           setProfileForm({
             ...profileForm,
             image: data.data.secure_url,
           });
 
           setImageId(data.data.public_id);
-          console.log("image is ", imageId);
+
           setTempImageUrl("");
         }
       } catch (e) {
@@ -303,7 +303,7 @@ const Profile = () => {
                 src={
                   user?.user?.image !== undefined
                     ? user.user.image
-                    : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                    : "https://i.pinimg.com/1200x/56/4b/69/564b698d4cf3a5b61e3318064549b35c.jpg"
                 }
                 width={150}
                 height={150}

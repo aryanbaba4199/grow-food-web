@@ -87,7 +87,7 @@ const OrderCard = ({ order, user }) => {
   // };
 
   const handleUpdate = (updatedDetails) => {
-    console.log("Updated Details: ", updatedDetails);
+
     setOpen(false);
   };
 

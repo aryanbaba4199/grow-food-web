@@ -1,47 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { Autocomplete, TextField, InputAdornment, Dialog } from "@mui/material";
 import { useRouter } from "next/router";
 import CryptoJS from "crypto-js";
-
+import UserContext from "@/userContext";
 import ProductDetails from "../product/Details";
+import { decryptData } from "@/Context/userFunction";
 
-const Search = ({ products = [] }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+const Search = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [open, setOpen] = useState(false);
-
+  const { searchInput, setSearchInput } = useContext(UserContext);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const router = useRouter();
-  // Function to handle search input change
-  const handleSearchChange = (event, value) => {
-    setSearchTerm(value);
 
-    const foundProduct = Array.isArray(products)
-      ? products.find((item) => item.name.toLowerCase() === value.toLowerCase())
-      : null;
-    if (foundProduct) {
-      const encryptedProduct = CryptoJS.AES.encrypt(
-        JSON.stringify(foundProduct),
-        "2468"
-      ).toString();
-      router.push(
-        `/ProductDetails?thegrowfood=${encodeURIComponent(encryptedProduct)}`
-      );
+  // Fetch and filter products whenever searchInput changes
+  useEffect(() => {
+    const storedProducts = localStorage.getItem("products");
+    if (storedProducts) {
+      const decryptedProducts = decryptData(storedProducts);
+      if (decryptedProducts) {
+        const options = decryptedProducts.filter((item) =>
+          item.name.toLowerCase().includes(searchInput.toLowerCase())
+        );
+        setFilteredProducts(options);
+      }
     }
+  }, [searchInput]);
+
+  // Handle search input change
+  const handleInputChange = (event, value) => {
+    setSearchInput(value);
   };
 
-  // Filtered products based on search term
-  const filteredProducts = Array.isArray(products)
-    ? products.filter((product) =>
-        product.name.toLowerCase().startsWith(searchTerm.toLowerCase())
-      )
-    : [];
+  // Handle product selection
+  const handleProductSelect = (event, value) => {
+    setSearchInput(value);
+    router.push("/ProductDetails")
+  };
 
   return (
     <>
       <Autocomplete
         freeSolo
-        id="free-solo-2-demo"
+        id="product-search"
         disableClearable
         options={filteredProducts.map((option) => option.name)}
         renderInput={(params) => (
@@ -64,8 +66,10 @@ const Search = ({ products = [] }) => {
             }}
           />
         )}
-        onInputChange={handleSearchChange}
+        onInputChange={handleInputChange} // Update search query in input change
+        onChange={handleProductSelect} // Handle product selection
       />
+
       <Dialog open={open} fullScreen onClose={() => setOpen(false)}>
         <ProductDetails product={selectedProduct} setOpen={setOpen} />
       </Dialog>

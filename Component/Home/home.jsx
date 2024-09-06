@@ -12,7 +12,11 @@ import {
   getCategories,
   memoize,
 } from "@/Context/productFunction";
-import { decryptData, fetchUserDetails } from "@/Context/userFunction";
+import {
+  decryptData,
+  encryptData,
+  fetchUserDetails,
+} from "@/Context/userFunction";
 
 const Home = () => {
   const [filteredBrand, setFilteredBrand] = useState([]);
@@ -21,29 +25,29 @@ const Home = () => {
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const router = useRouter();
-  const productContainerRef = useRef(null); // Create a ref for the product container
+  const productContainerRef = useRef(null);
 
   useEffect(() => {
     callFunctions();
     const storedProducts = localStorage.getItem("products");
     const products = storedProducts ? decryptData(storedProducts) : [];
-    setProducts(Array.isArray(products) && products.length !== 0 ? products : []);
+    setProducts(
+      Array.isArray(products) && products.length !== 0 ? products : []
+    );
     const storedBrands = localStorage.getItem("brands");
     const brands = storedBrands ? decryptData(storedBrands) : [];
     setBrands(Array.isArray(brands) ? brands : []);
     const storedCategories = localStorage.getItem("categories");
     const categories = storedCategories ? decryptData(storedCategories) : [];
     setCategories(Array.isArray(categories) ? categories : []);
-  
   }, []);
-  
 
   const callFunctions = async () => {
     const productData = await getProducts();
     const brandsData = await getBrands();
     const categoriesData = await getCategories();
     const fetchUserDetailsData = await fetchUserDetails();
-    
+
     if (productData.response === true) {
       setProducts(productData.data);
     }
@@ -78,7 +82,7 @@ const Home = () => {
 
   return (
     <>
-      {!products&& products.length===null && products.length===0 ? (
+      {!products && products.length === null && products.length === 0 ? (
         <Loader />
       ) : (
         <div className=" px-4 w-full md:mt-0 mt-14">
@@ -127,7 +131,17 @@ const Home = () => {
             {!isFilter ? (
               <>
                 {products.map((item, index) => (
-                  <div className="flex-1" key={index}>
+                  <div
+                    className="flex-1"
+                    key={index}
+                    onClick={() => {
+                      const id = encryptData(item._id);
+
+                      router.push(
+                        `/ProductDetails?thegrowfood=${encodeURIComponent(id)}`
+                      );
+                    }}
+                  >
                     <ProductCard
                       key={index}
                       item={item}
@@ -140,7 +154,6 @@ const Home = () => {
             ) : (
               <>
                 {filteredBrand.map((item, index) => (
-                  
                   <ProductCard
                     key={index}
                     item={item}

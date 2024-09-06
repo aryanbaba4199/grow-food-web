@@ -49,7 +49,7 @@ const Products = () => {
   }, []);
 
   const deleteProduct = async (id) => {
-    console.log("Deleted");
+
     try {
       const res = await axios.delete(
         `${API_URL}/api/products/deleteProduct/${id}`

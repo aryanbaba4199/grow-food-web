@@ -9,7 +9,7 @@ const API_URL = OrdersApi;
 
 export const createOrder = (order) => async dispatch => {
     try {
-        console.log(order);
+
         const res = await axios.post(`${API_URL}/create`, { order });
         dispatch({ type: CREATE_ORDER, payload: res.data });
     } catch (e) {

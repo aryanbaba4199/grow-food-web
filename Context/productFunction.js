@@ -60,7 +60,7 @@ export const getCategories = async () => {
 };
 
 export const getSubCategoriesProduct = async () => {
-  console.log("subCate", subCategory);
+
   try {
     const res = await axios.get(`${getProductbySubCategory}/${subCategory}`);
     if (res.status === 200) {

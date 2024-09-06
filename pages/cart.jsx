@@ -8,7 +8,8 @@ import { MdDelete } from "react-icons/md";
 import { useRouter } from "next/router";
 import { Button, Dialog, Typography } from "@mui/material";
 import Checkout from "@/Component/checkout/checkout";
-import { decryptData } from "@/Context/userFunction";
+import { decryptData, encryptData } from "@/Context/userFunction";
+import Head from "next/head";
 
 const Cart = () => {
   const [cartData, setCartData] = useState([]);
@@ -37,7 +38,7 @@ const Cart = () => {
   }, []);
 
   const getCartData = async (id) => {
-    console.log(id);
+
     setLoader(true);
     try {
       const res = await axios.get(`${getCartbyUser}/${id}`);
@@ -96,6 +97,7 @@ const Cart = () => {
           text: res.data.message,
         });
         getCartData(user.user._id);
+        userCartIds.splice(userCartIds.indexOf(id), 1);
         setLoader(false);
       }
     } catch (e) {
@@ -111,7 +113,6 @@ const Cart = () => {
 
   const handleCheckoutAll = () => {
     if (cartData.length > 0) {
-     
       setOpen(true);
     } else {
       Swal.fire({
@@ -122,10 +123,15 @@ const Cart = () => {
     }
   };
 
-  console.log(userCartIds);
+
 
   return (
     <>
+    <Head>
+          <title>The Grow Food</title>
+          <meta name="description" content="The Grow Food Is B2B solution for Restaurants" />
+          <meta name="keywords" content=" Rastaurants, Hotels, Foods, B2B" />
+        </Head>
       {loader ? (
         <Loader />
       ) : (
@@ -143,26 +149,44 @@ const Cart = () => {
           <div className="md:flex grid grid-cols-2 md:mt-2 mt-14 flex-row gap-4 flex-wrap justify-between w-fit  px-4">
             {cartData.map((item, index) => (
               <>
-              <div>
-              <ProductCard
-                item={item}
-                key={index}
-                
-                qty={
-                  userCartIds.find((cart) => cart.productId === item._id)?.qty
-                }
-              />
-              <div className="flex justify-between items-center mt-1">
-              <span className="txt-1">Quantity : {userCartIds[index]?.qty}</span>
-              <Button variant="contained" color="warning" style={{
-                padding : 2,
-                paddingLeft : 5,
-                paddingRight : 5,
-                margin :0,
-              }} onClick={()=>deleteCart(userCartIds[index]?._id)}>Delete Cart</Button>
+                <div>
+                  <div
+                    onClick={() => {
+                      const id = encryptData(item._id);
 
-              </div>
-              </div>
+                      router.push(
+                        `/ProductDetails?thegrowfood=${encodeURIComponent(id)}`
+                      );
+                    }}
+                  >
+                    <ProductCard
+                      item={item}
+                      key={index}
+                      qty={
+                        userCartIds.find((cart) => cart.productId === item._id)
+                          ?.qty
+                      }
+                    />
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="txt-1">
+                      Quantity : {userCartIds[index]?.qty}
+                    </span>
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      style={{
+                        padding: 2,
+                        paddingLeft: 5,
+                        paddingRight: 5,
+                        margin: 0,
+                      }}
+                      onClick={() => deleteCart(userCartIds[index]?._id)}
+                    >
+                      Delete Cart
+                    </Button>
+                  </div>
+                </div>
               </>
             ))}
           </div>
@@ -179,12 +203,7 @@ const Cart = () => {
         </div>
       )}
       <Dialog open={open} fullScreen>
-        <Checkout
-        
-          products={cartData}
-          
-          
-        />
+        <Checkout products={cartData} />
       </Dialog>
     </>
   );

@@ -8,6 +8,7 @@ import Analytics from "@/Component/Admin/Analytics";
 import { FaDatabase } from "react-icons/fa6";
 import { SiBrandfolder } from "react-icons/si";
 import { BiSolidCategoryAlt } from "react-icons/bi";
+import Head from "next/head";
 
 import { useSelector } from "react-redux";
 import { decryptData } from "@/Context/userFunction";
@@ -24,6 +25,11 @@ const Dashboard = () => {
 
   return (
     <>
+     <Head>
+          <title>The Grow Food</title>
+          <meta name="description" content="The Grow Food Is B2B solution for Restaurants" />
+          <meta name="keywords" content=" Rastaurants, Hotels, Foods, B2B" />
+        </Head>
       <Analytics/>
 
       <div className="flex md:flex-row flex-col gap-2 flex-wrap items-center container px-8 py-4 ">

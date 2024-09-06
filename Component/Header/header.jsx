@@ -57,6 +57,7 @@ const Header = ({ setCollapse, collapse }) => {
 
   const userDetails = user;
 
+
   const handleSignOut = () => {
     try {
       localStorage.removeItem("token");
@@ -85,7 +86,7 @@ const Header = ({ setCollapse, collapse }) => {
 
               <Link href="/">
                 <Image
-                  src={Logo}
+                  src={Logo }
                   className=" w-12 h-12 rounded-full p-1"
                   alt="Logo"
                 />
@@ -103,7 +104,7 @@ const Header = ({ setCollapse, collapse }) => {
             </span>
             {token && (
               <img
-                src={userDetails?.user?.image}
+                src={userDetails?.user?.image ?? "https://i.pinimg.com/1200x/5d/90/4b/5d904b9f3b2f1a21c7ef3d19729598a3.jpg"}
                 className="w-8 h-8 hover:cursor-pointer rounded-full mr-4"
                 onClick={() => setShowProfile(true)}
               />
@@ -163,7 +164,6 @@ const Header = ({ setCollapse, collapse }) => {
               ) : (
                 <Link
                   href="/auth"
-                  onClick={() => setUserMenu(false)}
                   className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
                 >
                   <span>
@@ -184,15 +184,18 @@ const Header = ({ setCollapse, collapse }) => {
                   <span>Profile</span>
                 </button>
               )}
-              <button
-                className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
-                onClick={() => router.push("/admin/dashboard")}
-              >
-                <span className="mt-1 text-yellow-600">
-                  <GrUserAdmin />
-                </span>
-                <span>Admin</span>
-              </button>
+              {user?.user?.userType === "Admin" ||
+                (user?.user?.userType === "Vendor" && (
+                  <button
+                    className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
+                    onClick={() => router.push("/admin/dashboard")}
+                  >
+                    <span className="mt-1 text-yellow-600">
+                      <GrUserAdmin />
+                    </span>
+                    <span>Admin</span>
+                  </button>
+                ))}
             </div>
           </div>
         </div>

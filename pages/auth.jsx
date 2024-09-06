@@ -12,6 +12,7 @@ import Loader from "@/Component/helpers/loader";
 import { data } from "autoprefixer";
 import { useDispatch } from "react-redux";
 import { encryptData } from "@/Context/userFunction";
+import Head from "next/head";
 
 const AuthComponent = () => {
   const [authType, setAuthType] = useState("SignIn");
@@ -35,7 +36,7 @@ const AuthComponent = () => {
     }
   }, [user]);
 
-  console.log(user);
+
 
   const handleAuthSwitch = () => {
     setAuthType(authType == "SignIn" ? "SignUp" : "SignIn");
@@ -94,7 +95,7 @@ const AuthComponent = () => {
       }
     } else {
       try {
-        console.log(data)
+
         const res = await axios.post(`${usersAPi}/register`, userData);
         if (res.status === 200) {
           setAuthType("SignIn")
@@ -128,6 +129,11 @@ const AuthComponent = () => {
 
   return (
     <>
+    <Head>
+          <title>The Grow Food</title>
+          <meta name="description" content="The Grow Food Is B2B solution for Restaurants" />
+          <meta name="keywords" content=" Rastaurants, Hotels, Foods, B2B" />
+        </Head>
       {loader ? (
         <Loader />
       ) : (

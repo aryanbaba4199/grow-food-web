@@ -53,7 +53,7 @@ const CreateBrand = () => {
     setLoader(true);
     try {
       const clRes = await uploadImageToCloudinary(icon);
-      console.log(clRes);
+      
       setIconURL(clRes.data.url);
       setImageId(clRes.data.public_id);
     } catch (e) {
@@ -159,7 +159,7 @@ const CreateBrand = () => {
         name: brandName,
         icon: iconURL ? iconURL : selectedBrand.icon,
       });
-      console.log(res);
+
       if (res.status === 200) {
         Swal.fire({
           title: "Success",

@@ -6,6 +6,7 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState("");
+  const [searchInput, setSearchInput] = useState('');
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -17,7 +18,7 @@ export const UserProvider = ({ children }) => {
         setUser(storedUser);
         if (user !== "") {
           const y = localStorage.getItem("token");
-         
+
           const storedToken = decryptData(y);
           setToken(storedToken);
         }
@@ -26,7 +27,9 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, token, setToken }}>
+    <UserContext.Provider
+      value={{ user, setUser, token, setToken, searchInput, setSearchInput }}
+    >
       {children}
     </UserContext.Provider>
   );

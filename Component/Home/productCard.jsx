@@ -40,15 +40,7 @@ const ProductCard = ({ item, index}) => {
       ) : (
         <div key={index} className="md:w-60 w-auto h-auto px-2 flex-1 border bg-gray-100 rounded-md flex flex-col pt-2 justify-center items-center cursor-pointer shadow-sm shadow-black hover:shadow-black hover:shadow-md">
           <div
-            onClick={() => {
-              const id = encryptData(item._id)
-              
-              router.push(
-                `/ProductDetails?thegrowfood=${encodeURIComponent(
-                  id
-                )}`
-              );
-            }}
+            
             className="w-full flex-1 justify-center items-center flex flex-col hover:scale-105 hover:ease-in-out hover:transition-all"
           >
             <Carousel

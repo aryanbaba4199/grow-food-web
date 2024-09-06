@@ -11,7 +11,7 @@ import Loader from "@/Component/helpers/loader";
 import Swal from "sweetalert2";
 import { MdDelete, MdDownload } from "react-icons/md";
 import { decryptData } from "@/Context/userFunction";
-
+import Head from "next/head";
 const Orders = () => {
   const { user } = useContext(UserContext);
   const [userAddress, setUserAddress] = useState([]);
@@ -60,7 +60,7 @@ const Orders = () => {
       if (res.status === 200) {
         setOrdersIds(res.data);
         const productIds = res.data.map((item) => item.productId);
-        console.log(productIds);
+
         getProductsfromId(productIds);
       }
     } catch (e) {
@@ -134,6 +134,11 @@ const Orders = () => {
 
   return (
     <>
+    <Head>
+          <title>The Grow Food</title>
+          <meta name="description" content="The Grow Food Is B2B solution for Restaurants" />
+          <meta name="keywords" content=" Rastaurants, Hotels, Foods, B2B" />
+        </Head>
       {loader ? (
         <Loader />
       ) : (

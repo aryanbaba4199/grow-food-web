@@ -26,7 +26,7 @@ const deleteImageFromCloudinary = async (imageId) => {
         const data = await response.json();    
     
     if (data.success) {
-      console.log("Image deleted from Cloudinary");
+
       return data;
     } else {
       console.error("Image deletion failed:", response.data);
@@ -193,7 +193,7 @@ export const whosVisiting = ()=>{
   const user = decryptData(localStorage.getItem('user'));
   
   if(user && user.user.userStatus==='Verified') {
-    console.log(user);
+
     if(user.user.userType==='Admin'){
       return "Admin";
     }else if(user.user.userType==='Vendor'){

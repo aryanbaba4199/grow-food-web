@@ -10,7 +10,6 @@ import { whosVisiting } from "@/Context/functions";
 import { decryptData } from "@/Context/userFunction";
 
 const SidebarMenu = ({ collapse }) => {
-  
   const [user, setUser] = useState("");
   const router = useRouter();
 
@@ -27,16 +26,11 @@ const SidebarMenu = ({ collapse }) => {
   let token;
 
   useEffect(() => {
-    
     const user = decryptData(localStorage.getItem("user"));
     setUser(user);
     const tokenData = decryptData(localStorage.getItem("token"));
-    token = tokenData
-
+    token = tokenData;
   }, []);
-
-
-
 
   return (
     <Sidebar
@@ -88,8 +82,10 @@ const SidebarMenu = ({ collapse }) => {
                 className="flex  gap-4 txt-1 rounded-md"
                 onClick={handleSignOut}
               >
+                <span>
                 <FaUser className="mt-1 ml-2" />
-                <span className="">Log Out</span>{" "}
+                </span>
+                <span>Log Out</span>{" "}
               </span>
             </MenuItem>
           ) : (

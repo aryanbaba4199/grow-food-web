@@ -9,12 +9,7 @@ import {
 import axios from "axios";
 import { FaPercent } from "react-icons/fa";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
-import {
-  // getBrands,
-  // getCategories,
-  // getSubCategories,
-  // getUnit,
-} from "@/Redux/actions/productActions"; // Adjust the import path as needed
+import { getSubCategories, getUnit } from "@/Redux/actions/productActions"; // Adjust the import path as needed
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
@@ -26,7 +21,12 @@ import deleteImageFromCloudinary, {
   uploadImageToCloudinary,
 } from "@/Context/functions";
 import { MdCameraFront } from "react-icons/md";
-import { getBrands, getCategories, getUnits, memoize } from "@/Context/productFunction";
+import {
+  getBrands,
+  getCategories,
+  getUnits,
+  memoize,
+} from "@/Context/productFunction";
 import { decryptData } from "@/Context/userFunction";
 
 const CreateProduct = ({ setIndex, setCreateMode, user }) => {
@@ -52,11 +52,14 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   };
 
   const dispatch = useDispatch();
-  const brands = useSelector((state) => state.products.brands);
-  const categories = useSelector((state) => state.products.categories);
+  // const brands = useSelector((state) => state.products.brands);
+  // const categories = useSelector((state) => state.products.categories);
   const unitsData = useSelector((state) => state.products.units);
   const subCategoryData = useSelector((state) => state.products.subCategories);
   const [image, setImage] = useState("");
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
+
   const [units, setUnits] = useState(["Create Unit"]);
   const [subCategory, setSubCategory] = useState(["Create Sub Category"]);
   const [imageId, setImageId] = useState([]);
@@ -68,14 +71,16 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   const [discountType, setDiscountType] = useState(0);
 
   useEffect(() => {
-    const getItems = async()=>{
-      const b = decryptData(localStorage.getItem('brands'));
-      const c = decryptData(localStorage.getItem('categories'));
-      const u = memoize(getUnits, 'units');
-      const s = decryptData(localStorage.getItem('products')).map(item=>item.subCategory)
-    }
+    dispatch(getSubCategories());
+    dispatch(getUnit());
+    const getItems = async () => {
+      const b = decryptData(localStorage.getItem("brands"));
+      const c = decryptData(localStorage.getItem("categories"));
+
+      setBrands(b);
+      setCategories(c);
+    };
     getItems();
-    
   }, []);
 
   useEffect(() => {
@@ -91,11 +96,11 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
     setUnits([...unitNames, "Create Unit"]);
   }, [unitsData]);
 
-  console.log(productData);
+ 
   useEffect(() => {
     if (subCategoryData !== undefined) {
       const subCategoryName = subCategoryData?.map((item) => item.name);
-      console.log(subCategoryName);
+      
       setSubCategory([...subCategoryName, "Create Sub Category"]);
     }
   }, [subCategoryData]);
@@ -119,6 +124,8 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
           text: "Product Created successfully",
           icon: "success",
         });
+
+        setProductData(defaultFormData);
         setTempImageURL([]);
       }
     } catch (e) {
@@ -145,15 +152,15 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
 
     for (let field in productData) {
       if (productData[field] === defaultFormData[field]) {
-        console.log(field);
+    
 
         errors.push(field);
       }
     }
-    console.log(errors);
+
 
     setErrorField(errors);
-    console.log(errorField.length);
+  
     if (errors.length === 0) {
       handleSubmit();
     } else {
@@ -182,27 +189,28 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
       });
       return;
     }
-  
+
     try {
       const uploadedImages = await Promise.all(
         image.map((image) => uploadImageToCloudinary(image))
       );
-  
+
       const successfulUploads = uploadedImages.filter(
         (imageData) => imageData.response === true
       );
-  
-      const imageUrls = successfulUploads.map((imageData) => imageData.data.url);
-  
-      console.log("2", imageUrls);
-  
+
+      const imageUrls = successfulUploads.map(
+        (imageData) => imageData.data.url
+      );
+
+ 
+
       // Combine the updates into a single setProductData call
       setProductData((prevProductData) => ({
         ...prevProductData,
         image: imageUrls,
         vendorId: user._id,
       }));
-  
     } catch (e) {
       console.error(e);
       Swal.fire({
@@ -212,10 +220,9 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
       });
     }
   };
-  
 
   // Remove useEffect since it's no longer needed
-  console.log(image.length === tempImageUrl.length);
+  
 
   const sellingPriceCalculator = () => {
     const price = productData.price;
@@ -583,7 +590,7 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
             }}
             onSelect={(event) => {
               if (event.target.value === "Create Unit") {
-                console.log("Ji", event.target.value);
+                
               }
             }}
             value={productData.unit}
@@ -710,7 +717,7 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
               variant="contained"
               color="info"
               onClick={() => {
-                setProductData( defaultFormData );
+                setProductData(defaultFormData);
                 setTempImageURL([]);
               }}
             >

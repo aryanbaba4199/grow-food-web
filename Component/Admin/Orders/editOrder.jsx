@@ -44,7 +44,7 @@ const EditOrder = ({ order, productDetails, setOpen }) => {
   
 
   const handleUpdateOrder = async()=>{
-    console.log("update order", updatedOrder);
+
     try{
       const res = await axios.put(`${updateOrderbyId}/${order._id}`, {formData : updatedOrder});
       if(res.status===200){
