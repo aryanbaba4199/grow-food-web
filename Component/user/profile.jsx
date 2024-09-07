@@ -34,7 +34,7 @@ const defaultformData = {
   landmark: "",
 };
 
-const Profile = () => {
+const Profile = (setOpen) => {
   const { user } = useContext(UserContext);
   const defaultProfileForm = {
     image: user.user.image,
@@ -440,7 +440,7 @@ const Profile = () => {
           />
         </div>
         <div className="flex justify-between px-4 items-center mt-4">
-        <Button variant="contained" color="inherit" onClick={()=>setEditProfile(false)}>
+        <Button variant="contained" color="inherit" onClick={()=>{setEditProfile(false)}}>
             Close
           </Button> 
           

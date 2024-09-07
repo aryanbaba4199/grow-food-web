@@ -26,7 +26,10 @@ const Products = () => {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 px-4">
           {productsData.map((item, index) => (
+            <>
+            {item.display!==false &&
             <div
+            key={index}
               onClick={() => {
                 const id = encryptData(item._id);
 
@@ -37,6 +40,8 @@ const Products = () => {
             >
               <ProductCard item={item} key={index} />
             </div>
+            }
+            </>
           ))}
         </div>
       )}

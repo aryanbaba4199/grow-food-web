@@ -71,7 +71,7 @@ const Header = ({ setCollapse, collapse }) => {
 
   return (
     <>
-      <div className="bg-[#1e4426] text-white md:relative fixed z-[500] w-full">
+      <div className="bg-color-1 1e4426] text-white md:relative fixed z-[500] w-full">
         <div className="flex justify-between items-center px-4 text-sm">
           <div className="flex justify-start items-center w-full">
             <div className=" flex justify-start gap-3 items-center">
@@ -123,7 +123,7 @@ const Header = ({ setCollapse, collapse }) => {
             <div className="flex flex-col gap-5 w-full mt-10">
               <Link
                 href="/"
-                onClick={() => setUserMenu(false)}
+                onClick={() => setOpen(false)}
                 className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%]"
               >
                 <span>
@@ -133,7 +133,7 @@ const Header = ({ setCollapse, collapse }) => {
               </Link>
               <Link
                 href="/products"
-                onClick={() => setUserMenu(false)}
+                onClick={() => setOpen(false)}
                 className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%]"
               >
                 <span>
@@ -143,7 +143,7 @@ const Header = ({ setCollapse, collapse }) => {
               </Link>
               <Link
                 href="/cart"
-                onClick={() => setUserMenu(false)}
+                onClick={() => setOpen(false)}
                 className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%]"
               >
                 <span>
@@ -164,6 +164,7 @@ const Header = ({ setCollapse, collapse }) => {
               ) : (
                 <Link
                   href="/auth"
+                  onClick={() => setOpen(false)}
                   className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
                 >
                   <span>
@@ -175,8 +176,9 @@ const Header = ({ setCollapse, collapse }) => {
 
               {token && (
                 <button
+                  
                   className="flex gap-2 hover:bg-gray-200 px-10 py-1 hover:ease-in-out hover:transform hover:text-black w-[100%] "
-                  onClick={() => setShowProfile(true)}
+                  onClick={() => {setShowProfile(true); setOpen(false)}}
                 >
                   <span className="mt-1 text-yellow-600">
                     <MdAdminPanelSettings />
@@ -206,7 +208,7 @@ const Header = ({ setCollapse, collapse }) => {
         open={showProfile}
         onClose={() => setShowProfile(false)}
       >
-        <Profile />
+        <Profile setOpen={setOpen} />
       </Drawer>
     </>
   );

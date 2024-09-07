@@ -27,10 +27,6 @@ const OrderCard = ({ order, user }) => {
   const [address, setAddress] = useState([]);
   const [product, setProducts] = useState([]);
 
-
-
-  
-
   useEffect(() => {
     if (order.productId) {
       getDeliveryAddres(order.addressId);
@@ -55,6 +51,11 @@ const OrderCard = ({ order, user }) => {
       }
     }
   }, [order.productId]);
+
+  const productis = decryptData(localStorage.getItem("products")).find(
+    (item) => item._id === order.productId
+  );
+  console.log("d", productis);
 
   // const handleOpen = () => {
   //   Swal.fire({
@@ -87,7 +88,6 @@ const OrderCard = ({ order, user }) => {
   // };
 
   const handleUpdate = (updatedDetails) => {
-
     setOpen(false);
   };
 
@@ -173,14 +173,16 @@ const OrderCard = ({ order, user }) => {
                   <strong>Product Category :</strong>
                 </TableCell>
                 <TableCell>
-                  {product ? product.categories : "Loading..."}
+                  {productis ? productis.categories : "Loading..."}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>
                   <strong>Brand :</strong>
                 </TableCell>
-                <TableCell>{product ? product.brand : "Loading..."}</TableCell>
+                <TableCell>
+                  {productis ? productis.brand : "Loading..."}
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>
@@ -240,7 +242,7 @@ const OrderCard = ({ order, user }) => {
         >
           <EditOrder
             order={order}
-            productDetails={product}
+            productDetails={productis}
             onUpdate={handleUpdate}
             setOpen={setOpen}
           />

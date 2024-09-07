@@ -96,11 +96,10 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
     setUnits([...unitNames, "Create Unit"]);
   }, [unitsData]);
 
- 
   useEffect(() => {
     if (subCategoryData !== undefined) {
       const subCategoryName = subCategoryData?.map((item) => item.name);
-      
+
       setSubCategory([...subCategoryName, "Create Sub Category"]);
     }
   }, [subCategoryData]);
@@ -114,6 +113,7 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   //     handleSubmit();
   //   }
   // }, [imageId, errorField.length])
+  console.log(productData);
 
   const handleSubmit = async () => {
     try {
@@ -152,15 +152,12 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
 
     for (let field in productData) {
       if (productData[field] === defaultFormData[field]) {
-    
-
         errors.push(field);
       }
     }
 
-
     setErrorField(errors);
-  
+
     if (errors.length === 0) {
       handleSubmit();
     } else {
@@ -203,8 +200,6 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
         (imageData) => imageData.data.url
       );
 
- 
-
       // Combine the updates into a single setProductData call
       setProductData((prevProductData) => ({
         ...prevProductData,
@@ -222,7 +217,6 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   };
 
   // Remove useEffect since it's no longer needed
-  
 
   const sellingPriceCalculator = () => {
     const price = productData.price;
@@ -273,6 +267,7 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
             <>
               {tempImageUrl.map((item, index) => (
                 <Image
+                  key={index}
                   src={item}
                   width={200}
                   height={200}
@@ -590,7 +585,6 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
             }}
             onSelect={(event) => {
               if (event.target.value === "Create Unit") {
-                
               }
             }}
             value={productData.unit}

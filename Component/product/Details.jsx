@@ -24,14 +24,15 @@ import { useRouter } from "next/router";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { decryptData } from "@/Context/userFunction";
+import { memoize } from "@/Context/productFunction";
+
 
 const Details = ({ productData }) => {
   const [checkoutProduct, setCheckoutProduct] = useState([]);
-  const [cOpen, setCopen] = useState(false);
-
   const [email, setEmail] = useState("");
   const [product, setProduct] = useState(null); // Start with null or undefined
   const [qty, setQty] = useState(0);
+  const [open, setOpen] = useState(false);
 
   const router = useRouter();
   const { token, user, searchInput } = useContext(UserContext);
@@ -57,8 +58,6 @@ const Details = ({ productData }) => {
       setProduct(searchedProduct || {});
     }
   }, [searchInput]);
-
-
 
   if (!product) {
     return <div>Loading...</div>;
@@ -124,12 +123,13 @@ const Details = ({ productData }) => {
       });
     }
   };
+  
 
   const handleBuyNow = () => {
     if (token !== "") {
       setCheckoutProduct([product]);
       setEmail(user?.user?.email);
-      setCopen(true);
+      setOpen(true);
     } else {
       Swal.fire({
         title: "Log in Required",
@@ -146,7 +146,6 @@ const Details = ({ productData }) => {
 
   const handleDecrement = () => {
     if (qty <= product.minimumOrderQty) {
-
     } else {
       setQty(qty - (product.incDecBy !== undefined ? product.incDecBy : 1));
     }
@@ -154,14 +153,12 @@ const Details = ({ productData }) => {
 
   const handleIncrement = () => {
     if (qty > product.availableQty) {
-      Swal.fire(`Minimum Order Quantity is : ${qty}`)
+      Swal.fire(`Minimum Order Quantity is : ${qty}`);
     } else {
       setQty(qty + (product.incDecBy !== undefined ? product.incDecBy : 1));
     }
   };
-
-
-
+ 
   return (
     <>
       {product === null ? (
@@ -191,11 +188,7 @@ const Details = ({ productData }) => {
                     ]
                   : product.image
                 ).map((imageUri, index) => (
-                  <div
-                    key={index}
-                    className="w-full"
-                  
-                  >
+                  <div key={index} className="w-full">
                     <img
                       src={
                         imageUri
@@ -234,6 +227,7 @@ const Details = ({ productData }) => {
                 <Button
                   onClick={handleCart}
                   variant="contained"
+                  disabled={product.display===false}
                   color="warning"
                   className="w-[50%]"
                 >
@@ -241,6 +235,7 @@ const Details = ({ productData }) => {
                 </Button>
                 <Button
                   onClick={handleBuyNow}
+                  disabled={product.display===false}
                   variant="contained"
                   color="success"
                   className="w-[50%]"
@@ -276,8 +271,14 @@ const Details = ({ productData }) => {
                 </div>
                 <Table className="mt-4">
                   <TableBody>
+                    {product.display===false && 
+                      <TableRow>
+                        <TableCell>
+                          <span className="text-red-600 font-semibold">Out of Stock</span></TableCell>
+                      </TableRow>
+                    }
                     <TableRow>
-                      <TableCell>Total Payable :/-</TableCell>
+                      <TableCell>Total Payable :</TableCell>
                       <TableCell
                         className={`${
                           product.sellingPrice * qty > 2000
@@ -325,22 +326,23 @@ const Details = ({ productData }) => {
         </div>
       )}
       <Dialog
-        open={cOpen}
+        open={open}
         fullWidth
         maxWidth="lg"
-        onClose={() => setCopen(false)}
+        onClose={() => setOpen(false)}
         fullScreen
       >
         <Checkout
           products={checkoutProduct}
-          qty={qty}
+          qty={[qty]}
           maxWidth="lg"
           // fullScreen={isSmallScreen}
           // PaperProps={{
           //   style: { width: isSmallScreen ? "100%" : "80%", height: "100vh" },
           // }}
+          open={open}
           uid={user?._id}
-          setCopen={setCopen}
+          setCopen={setOpen}
           // setOpen={setOpen}
         />
       </Dialog>

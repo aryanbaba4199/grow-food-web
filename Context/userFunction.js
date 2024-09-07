@@ -1,4 +1,4 @@
-import { getUserApi, usersAPi } from "@/Api";
+import { getuserAddress, getUserApi, usersAPi } from "@/Api";
 import axios from "axios";
 import CryptoJS from "crypto-js";
 
@@ -53,5 +53,20 @@ export const decryptData = (ciphertext) => {
     }
   } else {
     return null;
+  }
+};
+
+
+export const getAddress = async () => {
+  try {
+    const res = await axios.get(`${getuserAddress}/${decryptData(localStorage.getItem('user')).user._id}`);
+    if (res.status === 200) {
+     
+      localStorage.setItem("userAddress", encryptData(res.data));
+      return {data: res.data, response : true};
+    }
+  } catch (e) {
+    console.error(e);
+    return {data: e, response : true};
   }
 };

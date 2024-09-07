@@ -8,7 +8,7 @@ import {
 import axios from "axios";
 import { encryptData, decryptData } from "./userFunction";
 
-export const memoize = async (fn, name, ) => {
+export const memoize = async (fn, name) => {
   const cachedData = localStorage.getItem(name);
   if (cachedData) {
     try {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { getuserAddress, createOrderAPI } from "@/Api";
 import UserContext from "@/userContext";
-
 import {
   Card,
   CardContent,
@@ -18,56 +17,63 @@ import { useRouter } from "next/router";
 import { IoMdCloseCircle } from "react-icons/io";
 import axios from "axios";
 import { FaCheckDouble } from "react-icons/fa";
-import orders from "@/pages/admin/orders";
 import { decryptData } from "@/Context/userFunction";
 
 const Checkout = ({
   products,
-  quantities,
+  qty, // Array of quantities
   setCopen,
-  setOpen,
   deleteCart,
-  qty,
 }) => {
-  const [address, setAddress] = useState(null);
+  const [address, setAddress] = useState([]);
   const [addressId, setAddressId] = useState("");
   const [calculatedPrices, setCalculatedPrices] = useState([]);
   const router = useRouter();
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    if (user.user) {
-      setAddress(decryptData(localStorage.getItem("userAddress")));
-    }
-  }, [user]);
+    const fetchAddress = async () => {
+      try {
+        const res = await axios.get(
+          `${getuserAddress}/${
+            decryptData(localStorage.getItem("user")).user._id
+          }`
+        );
+        if (res.status === 200) {
+          setAddress(res.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchAddress();
+  }, []);
 
   useEffect(() => {
-    if ((products.length > 0 && quantities?.length > 0) || qty) {
-      const newCalculatedPrices = products.map((item) => {
-        const quantity =
-          quantities?.find((cart) => cart?.productId === item?._id)?.qty || qty;
+    if (products.length > 0 && qty.length > 0) {
+      const newCalculatedPrices = products.map((item, index) => {
+        const quantity = qty[index]; // Corresponding quantity for the product
         const totalPrice = quantity * item.sellingPrice;
         return { productId: item._id, quantity, totalPrice };
       });
       setCalculatedPrices(newCalculatedPrices);
+      validatePrice();
     }
-  }, [products, quantities]);
-
-  //
+  }, [products, qty]);
 
   const handleCheckOut = async () => {
     if (!addressId) {
-    Swal.fire({
-      title: 'Addresses',
-      icon: 'warning',
-      text: 'Please select an address'
-    })
+      Swal.fire({
+        title: "Addresses",
+        icon: "warning",
+        text: "Please select an address",
+      });
       return;
     }
 
     const orderDetails = calculatedPrices.map((item) => ({
       productId: item.productId,
-      vendorId: item.vendorId,
+      vendorId: products.find((pr) => pr._id === item.productId)?.vendorId,
       userId: user.user._id,
       addressId,
       quantity: item.quantity,
@@ -75,6 +81,7 @@ const Checkout = ({
       paymentMode: "COD",
       orderAmount: item.totalPrice,
     }));
+    console.log(orderDetails)
 
     try {
       const res = await axios.post(createOrderAPI, { orders: orderDetails });
@@ -83,13 +90,12 @@ const Checkout = ({
 
         setCopen(false);
         router.push("/");
-        if (deleteCart !== undefined ) {
+        if (deleteCart) {
           for (const item of orderDetails) {
             await deleteCart(item.productId);
           }
         }
       }
-      
     } catch (e) {
       Swal.fire("Error", e.message, "error");
     }
@@ -100,21 +106,20 @@ const Checkout = ({
     0
   );
 
-  useEffect(() => {
-    const totalPayable = products.reduce(
-      (acc, product) => acc + product.sellingPrice * qty,
-      0
-    );
-
-    if (totalPayable < 2000) {
-      Swal.fire({
-        title: "Minimum Order: 2000/-",
-        icon: "info",
-        text: `You have to create an order amount of a minimum of 2000/- currently: ${totalPayable}`,
-      });
-      setCopen(false);
+  const validatePrice = () => {
+    if (totalPayable === 0) {
+      return;
+    } else {
+      if (parseInt(totalPayable) < 2000) {
+        Swal.fire({
+          title: "Minimum Order: 2000/-",
+          icon: "info",
+          text: `You have to create an order amount of a minimum of 2000/- currently: ${totalPayable}`,
+        });
+        setCopen(false);
+      }
     }
-  }, [products, qty]);
+  };
 
   return (
     <>
@@ -137,7 +142,7 @@ const Checkout = ({
                 </Typography>
 
                 <div className="mt-4">
-                  {address ? (
+                  {address.length > 0 ? (
                     address.map((item) => (
                       <div
                         key={item._id}

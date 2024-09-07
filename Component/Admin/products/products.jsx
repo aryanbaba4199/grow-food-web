@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+
 import { FaRupeeSign } from "react-icons/fa";
-import { getProducts } from "@/Redux/actions/productActions";
+
 import EditProducts from "./EditProducts";
 import CreateProduct from "./createproduct";
 import Loader from "../../helpers/loader";
@@ -26,6 +26,8 @@ const Products = () => {
   const [createMode, setCreateMode] = useState(false);
   const [loader, setLoader] = useState(true);
   const [products, setProducts] = useState([]);
+  const [display, setDisplay] = useState(true);
+  
 
   const handleClickOpen = (product) => {
     setSelectedProduct(product);
@@ -38,6 +40,10 @@ const Products = () => {
     setSelectedProduct(null);
   };
 
+  useEffect(()=>{
+    setDisplay(selectedProduct?.display ?? true)
+  }, [selectedProduct])
+
   useEffect(() => {
     const x = decryptData(localStorage.getItem("products"));
     const user = decryptData(localStorage.getItem("user")).user;
@@ -49,7 +55,6 @@ const Products = () => {
   }, []);
 
   const deleteProduct = async (id) => {
-
     try {
       const res = await axios.delete(
         `${API_URL}/api/products/deleteProduct/${id}`
@@ -72,11 +77,14 @@ const Products = () => {
     }
   };
 
+  
+
   return (
     <>
       {products.length !== 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {products?.map((item, index) => (
+            
             <div
               key={index}
               onClick={() => handleClickOpen(item)}
@@ -87,7 +95,7 @@ const Products = () => {
               <p className="font-bold">{item.categories}</p>
               <div className=" flex gap-2">
                 <FaRupeeSign className="mt-1" />
-                <p>{item.price}/-</p>
+                <p>{item.sellingPrice}/-</p>
               </div>
             </div>
           ))}
@@ -102,6 +110,7 @@ const Products = () => {
             <EditProducts
               open={editMode}
               setOpen={setOpen}
+              setEditMode={setEditMode}
               product={selectedProduct}
             />
           ) : createMode ? (
@@ -161,6 +170,7 @@ const Products = () => {
                 </Grid>
               </DialogContent>
               <DialogActions className="flex justify-between">
+                
                 <Button
                   variant="contained"
                   color="success"

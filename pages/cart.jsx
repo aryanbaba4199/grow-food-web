@@ -10,6 +10,7 @@ import { Button, Dialog, Typography } from "@mui/material";
 import Checkout from "@/Component/checkout/checkout";
 import { decryptData, encryptData } from "@/Context/userFunction";
 import Head from "next/head";
+import products from "./admin/products";
 
 const Cart = () => {
   const [cartData, setCartData] = useState([]);
@@ -17,6 +18,7 @@ const Cart = () => {
   const [userId, setUserId] = useState("");
   const [loader, setLoader] = useState(false);
   const [open, setOpen] = useState(false);
+  const [qty, setQty] = useState([]);
   const ref = useRef(false);
   const router = useRouter();
 
@@ -38,7 +40,6 @@ const Cart = () => {
   }, []);
 
   const getCartData = async (id) => {
-
     setLoader(true);
     try {
       const res = await axios.get(`${getCartbyUser}/${id}`);
@@ -68,7 +69,12 @@ const Cart = () => {
       (item) => userCartIds.map((id) => id.productId).includes(item._id)
     );
     setCartData(product);
+
+    for (let i = 0; i < product.length; i++) {
+      qty.push(userCartIds[i].qty);
+    }
   }, [userCartIds, loader]);
+  console.log(qty);
 
   // const getProductsfromId = async (productIds) => {
   //   try {
@@ -97,7 +103,7 @@ const Cart = () => {
           text: res.data.message,
         });
         getCartData(user.user._id);
-        userCartIds.splice(userCartIds.indexOf(id), 1);
+        userCartIds.splice(userCartIds.indexOf(id)._id, 1);
         setLoader(false);
       }
     } catch (e) {
@@ -123,15 +129,17 @@ const Cart = () => {
     }
   };
 
-
-
+  console.log(cartData);
   return (
     <>
-    <Head>
-          <title>The Grow Food</title>
-          <meta name="description" content="The Grow Food Is B2B solution for Restaurants" />
-          <meta name="keywords" content=" Rastaurants, Hotels, Foods, B2B" />
-        </Head>
+      <Head>
+        <title>The Grow Food</title>
+        <meta
+          name="description"
+          content="The Grow Food Is B2B solution for Restaurants"
+        />
+        <meta name="keywords" content=" Rastaurants, Hotels, Foods, B2B" />
+      </Head>
       {loader ? (
         <Loader />
       ) : (
@@ -203,7 +211,7 @@ const Cart = () => {
         </div>
       )}
       <Dialog open={open} fullScreen>
-        <Checkout products={cartData} />
+        <Checkout products={cartData} setCopen={setOpen} qty={qty} />
       </Dialog>
     </>
   );

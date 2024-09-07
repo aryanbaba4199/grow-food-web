@@ -1,6 +1,7 @@
 import axios from "axios";
 import dynamic from 'next/dynamic';
 import { decryptData } from "./userFunction";
+import imageCompression from "browser-image-compression";
 
 // Dynamically import jsPDFInvoiceTemplate only on the client side
 const jsPDFInvoiceTemplate = dynamic(() => import('jspdf-invoice-template'), { ssr: false });
@@ -43,23 +44,47 @@ export default deleteImageFromCloudinary;
 
 
 
-export const uploadImageToCloudinary = async(image)=>{
-    try{
-        const formData = new FormData();
-        formData.append("file", image);
-        formData.append("upload_preset", cloudinaryPreset);
-        const cloudinaryResponse = await axios.post(
-          `https://api.cloudinary.com/v1_1/${cloudinaryName}/image/upload`,
-          formData
-        );
-        
-        const data = {response : true, data : cloudinaryResponse.data}
-        return data;
-    }catch(e){
-        const data = {response : false, error : e}
-        return {data};
-    }
-}
+
+export const uploadImageToCloudinary = async (image) => {
+  try {
+    // Compress the image
+    const compressedImage = await compressImage(image);
+
+    const formData = new FormData();
+    formData.append("file", compressedImage);
+    formData.append("upload_preset", cloudinaryPreset);
+
+    const cloudinaryResponse = await axios.post(
+      `https://api.cloudinary.com/v1_1/${cloudinaryName}/image/upload`,
+      formData
+    );
+
+    const data = { response: true, data: cloudinaryResponse.data };
+    return data;
+  } catch (e) {
+    const data = { response: false, error: e };
+    return { data };
+  }
+};
+
+// Function to compress the image
+const compressImage = async (image) => {
+  const options = {
+    maxSizeMB: 1, // Maximum size in MB (e.g., 1MB)
+    maxWidthOrHeight: 1080, // Maximum width or height of the image
+    useWebWorker: true, // Use a web worker for compression
+    fileType: 'image/webp' // Convert to WebP format
+  };
+
+  try {
+    const compressedFile = await imageCompression(image, options);
+    return compressedFile;
+  } catch (error) {
+    console.error("Error compressing image:", error);
+    throw error;
+  }
+};
+
 
 
 export const generatePDF = ({data}) => {

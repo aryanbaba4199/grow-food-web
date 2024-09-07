@@ -25,6 +25,7 @@ const EditOrder = ({ order, productDetails, setOpen }) => {
   const [showFailureReason, setShowFailureReason] = useState(false);
 
   const dispatch = useDispatch();
+  console.log(productDetails)
 
   useEffect(() => {
     setUpdatedOrder(order);
@@ -109,7 +110,7 @@ const EditOrder = ({ order, productDetails, setOpen }) => {
               name="orderAmount"
               type="number"
               disabled
-              value={updatedOrder.quantity*productDetails.sellingPrice || ""}
+              value={updatedOrder.quantity*productDetails?.sellingPrice || ""}
               onChange={handleChange}
               margin="normal"
             />

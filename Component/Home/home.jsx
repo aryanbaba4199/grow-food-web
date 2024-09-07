@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 
 import ProductCard from "./productCard";
-
+import { IoIosArrowForward } from "react-icons/io";
 import Banner from "./banner";
 import Loader from "../helpers/loader";
 import Slide from "./sliderMenu";
@@ -105,64 +105,72 @@ const Home = () => {
               filter={handleCategoryFilter}
             />
           </div>
-          <div className="flex mt-8 justify-between rounded-r-none border-color-1 txt-1 border rounded-xl ">
-            <span className="font-bold text-lg px-8 py-1">
-              Special Products
-            </span>
-            <span
-              onClick={() =>
-                router.push({
-                  pathname: "/products",
-                  query: {
-                    selectedProducts: JSON.stringify(products),
-                  },
-                })
-              }
-              className="bg-color-1 px-6 hover:cursor-pointer"
+          <div className="drop-shadow-2xl shadow-black shadow-black">
+            <div className="flex mt-8 justify-between txt-1 ">
+              <span className="font-bold text-lg px-8 py-1">
+                Special Products
+              </span>
+              <span
+                onClick={() =>
+                  router.push({
+                    pathname: "/products",
+                    query: {
+                      selectedProducts: JSON.stringify(products),
+                    },
+                  })
+                }
+                className=" px-6 hover:cursor-pointer"
+              >
+                <IoIosArrowForward className="w-6 h-6 p-1 bg-color-1 rounded-full mt-1" />
+              </span>
+            </div>
+            <div
+              id="product-container"
+              ref={productContainerRef} // Attach the ref to the product container div
+              className="md:flex flex-row flex-wrap grid grid-cols-2 gap-4 mt-4"
             >
-              View All
-            </span>
-          </div>
-          <div
-            id="product-container"
-            ref={productContainerRef} // Attach the ref to the product container div
-            className="md:flex flex-row flex-wrap grid grid-cols-2 gap-4 mt-4"
-          >
-            {!isFilter ? (
-              <>
-                {products.map((item, index) => (
-                  <div
-                    className="flex-1"
-                    key={index}
-                    onClick={() => {
-                      const id = encryptData(item._id);
+              {!isFilter ? (
+                <>
+                  {products.map((item, index) => (
+                    <>
+                      {item.display !== false && (
+                        <div
+                          className="flex-1"
+                          key={index}
+                          onClick={() => {
+                            const id = encryptData(item._id);
 
-                      router.push(
-                        `/ProductDetails?thegrowfood=${encodeURIComponent(id)}`
-                      );
-                    }}
-                  >
+                            router.push(
+                              `/ProductDetails?thegrowfood=${encodeURIComponent(
+                                id
+                              )}`
+                            );
+                          }}
+                        >
+                          <ProductCard
+                            key={index}
+                            item={item}
+                            isCart={false}
+                            deleteCartItem={false}
+                          />
+                        </div>
+                      )}
+                    </>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {filteredBrand.map((item, index) => (
                     <ProductCard
                       key={index}
                       item={item}
                       isCart={false}
                       deleteCartItem={false}
                     />
-                  </div>
-                ))}
-              </>
-            ) : (
-              <>
-                {filteredBrand.map((item, index) => (
-                  <ProductCard
-                    key={index}
-                    item={item}
-                    isCart={false}
-                    deleteCartItem={false}
-                  />
-                ))}
-              </>
-            )}
+                  ))}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
