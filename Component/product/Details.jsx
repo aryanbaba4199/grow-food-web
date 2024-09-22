@@ -26,7 +26,6 @@ import "react-multi-carousel/lib/styles.css";
 import { decryptData } from "@/Context/userFunction";
 import { memoize } from "@/Context/productFunction";
 
-
 const Details = ({ productData }) => {
   const [checkoutProduct, setCheckoutProduct] = useState([]);
   const [email, setEmail] = useState("");
@@ -123,7 +122,6 @@ const Details = ({ productData }) => {
       });
     }
   };
-  
 
   const handleBuyNow = () => {
     if (token !== "") {
@@ -158,7 +156,7 @@ const Details = ({ productData }) => {
       setQty(qty + (product.incDecBy !== undefined ? product.incDecBy : 1));
     }
   };
- 
+
   return (
     <>
       {product === null ? (
@@ -227,7 +225,7 @@ const Details = ({ productData }) => {
                 <Button
                   onClick={handleCart}
                   variant="contained"
-                  disabled={product.display===false}
+                  disabled={product.display === false}
                   color="warning"
                   className="w-[50%]"
                 >
@@ -235,7 +233,7 @@ const Details = ({ productData }) => {
                 </Button>
                 <Button
                   onClick={handleBuyNow}
-                  disabled={product.display===false}
+                  disabled={product.display === false}
                   variant="contained"
                   color="success"
                   className="w-[50%]"
@@ -271,12 +269,15 @@ const Details = ({ productData }) => {
                 </div>
                 <Table className="mt-4">
                   <TableBody>
-                    {product.display===false && 
+                    {product.display === false && (
                       <TableRow>
                         <TableCell>
-                          <span className="text-red-600 font-semibold">Out of Stock</span></TableCell>
+                          <span className="text-red-600 font-semibold">
+                            Out of Stock
+                          </span>
+                        </TableCell>
                       </TableRow>
-                    }
+                    )}
                     <TableRow>
                       <TableCell>Total Payable :</TableCell>
                       <TableCell
@@ -303,7 +304,9 @@ const Details = ({ productData }) => {
                     </TableRow>
                     <TableRow>
                       <TableCell>Packet of:</TableCell>
-                      <TableCell>{product.productQty}</TableCell>
+                      <TableCell>
+                        {product.productQty} {product.unit}
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>Minimum Order:</TableCell>

@@ -105,7 +105,7 @@ const Home = () => {
               filter={handleCategoryFilter}
             />
           </div>
-          <div className="drop-shadow-2xl shadow-black shadow-black">
+          <div className="drop-shadow-2xl  shadow-black">
             <div className="flex mt-8 justify-between txt-1 ">
               <span className="font-bold text-lg px-8 py-1">
                 Special Products

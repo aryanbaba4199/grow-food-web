@@ -20,6 +20,7 @@
     "cloudinary": "^2.2.0",
     "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
+    "growfoodweb": "file:",
     "jspdf-invoice-template": "^1.4.4",
     "next": "14.2.5",
     "next-cloudinary": "^6.6.2",

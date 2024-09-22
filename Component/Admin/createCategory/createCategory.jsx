@@ -29,6 +29,7 @@ const CreateCategory = () => {
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState([]);
 
+
   const router = useRouter();
 
   useEffect(() => {

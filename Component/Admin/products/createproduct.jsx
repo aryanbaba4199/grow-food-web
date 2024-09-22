@@ -28,6 +28,7 @@ import {
   memoize,
 } from "@/Context/productFunction";
 import { decryptData } from "@/Context/userFunction";
+import Loader from "@/Component/helpers/loader";
 
 const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   const defaultFormData = {
@@ -56,10 +57,11 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   // const categories = useSelector((state) => state.products.categories);
   const unitsData = useSelector((state) => state.products.units);
   const subCategoryData = useSelector((state) => state.products.subCategories);
+
   const [image, setImage] = useState("");
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
-
+  const [loader, setLoader] = useState(false);
   const [units, setUnits] = useState(["Create Unit"]);
   const [subCategory, setSubCategory] = useState(["Create Sub Category"]);
   const [imageId, setImageId] = useState([]);
@@ -73,23 +75,16 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   useEffect(() => {
     dispatch(getSubCategories());
     dispatch(getUnit());
-    const getItems = async () => {
-      const b = decryptData(localStorage.getItem("brands"));
-      const c = decryptData(localStorage.getItem("categories"));
-
-      setBrands(b);
-      setCategories(c);
-    };
-    getItems();
+    brandAndCategory();
   }, []);
 
-  useEffect(() => {
-    setFilteredBrands(brands);
-  }, [brands]);
-
-  useEffect(() => {
-    setFilteredCategories(categories);
-  }, [categories]);
+  const brandAndCategory = async () => {
+    const x = await getBrands();
+    const cat = await getCategories();
+    setFilteredBrands(x.data);
+    setFilteredCategories(cat.data);
+    console.log(cat.data);
+  };
 
   useEffect(() => {
     const unitNames = unitsData.map((unit) => unit.name);
@@ -113,9 +108,9 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
   //     handleSubmit();
   //   }
   // }, [imageId, errorField.length])
-  console.log(productData);
 
   const handleSubmit = async () => {
+    setLoader(true);
     try {
       const response = await axios.post(createProduct, productData, {});
       if (response.status === 200) {
@@ -127,10 +122,12 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
 
         setProductData(defaultFormData);
         setTempImageURL([]);
+        setImageId([]);
+        setLoader(false);
       }
     } catch (e) {
       imageId.map(async (item) => await deleteImageFromCloudinary(item));
-      console.log("Failed to upload");
+      setLoader(false);
       Swal.fire({
         title: "Error",
         text: e.message,
@@ -199,6 +196,7 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
       const imageUrls = successfulUploads.map(
         (imageData) => imageData.data.url
       );
+      const imageIds = successfulUploads.map((imageData) => imageData.data.public_id);
 
       // Combine the updates into a single setProductData call
       setProductData((prevProductData) => ({
@@ -206,6 +204,7 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
         image: imageUrls,
         vendorId: user._id,
       }));
+      setImageId(imageIds);
     } catch (e) {
       console.error(e);
       Swal.fire({
@@ -230,7 +229,13 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
     }
   };
 
+
+  
+  
+
   return (
+    <>
+    {loader ? <Loader/> : 
     <Box className="p-4">
       <Typography
         variant="h4"
@@ -442,7 +447,7 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
                 label="Type"
                 id="type"
                 disabled={productData.image.length === 0}
-                value={productData.discountType}
+                value={productData.discountType === 1}
                 onChange={(e) => {
                   setDiscountType(e.target.value);
                   setProductData({
@@ -713,6 +718,8 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
               onClick={() => {
                 setProductData(defaultFormData);
                 setTempImageURL([]);
+                imageId.map(async (item) => await deleteImageFromCloudinary(item));
+
               }}
             >
               Reset
@@ -729,6 +736,8 @@ const CreateProduct = ({ setIndex, setCreateMode, user }) => {
         </div>
       </div>
     </Box>
+}
+    </>
   );
 };
 
